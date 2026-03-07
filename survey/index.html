@@ -170,13 +170,7 @@
       <p>Estou criando um app para catalogar sua coleção, descobrir o valor de cada peça e comprar/vender com outros colecionadores. Antes de codar, quero ouvir quem realmente coleciona.</p>
     </div>
 
-    <form action="https://formsubmit.co/decomontenegro@gmail.com" method="POST">
-
-      <!-- Campos ocultos formsubmit -->
-      <input type="hidden" name="_subject" value="🎖️ Nova resposta — Survey filecard.app">
-      <input type="hidden" name="_captcha" value="false">
-      <input type="hidden" name="_next" value="https://decomontenegro.github.io/filecard-app/survey/obrigado.html">
-      <input type="hidden" name="_template" value="table">
+    <form id="surveyForm">
 
       <!-- SEÇÃO 1 -->
       <div class="section-title">Seção 1 — Seu perfil</div>
@@ -279,5 +273,43 @@
 
     <p class="footer">Suas respostas são anônimas e serão usadas apenas para desenvolvimento do produto.</p>
   </div>
+
+  <script>
+    document.getElementById('surveyForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('.submit-btn');
+      btn.textContent = 'Enviando...';
+      btn.disabled = true;
+
+      const data = {};
+      const inputs = form.querySelectorAll('input[name], textarea[name]');
+      inputs.forEach(input => {
+        if (input.type === 'checkbox') {
+          if (input.checked) {
+            data[input.name] = data[input.name]
+              ? data[input.name] + ', ' + input.value
+              : input.value;
+          }
+        } else if (input.type === 'radio') {
+          if (input.checked) data[input.name] = input.value;
+        } else {
+          if (input.value) data[input.name] = input.value;
+        }
+      });
+
+      try {
+        await fetch('http://167.99.117.219:3099/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        window.location.href = 'obrigado.html';
+      } catch (err) {
+        btn.textContent = 'Erro ao enviar. Tente novamente.';
+        btn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>
