@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>filecard.app — Survey para Colecionadores</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d0d0d;
+      color: #f0f0f0;
+      min-height: 100vh;
+      padding: 40px 16px 80px;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .header .emoji { font-size: 48px; margin-bottom: 16px; }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .header p {
+      font-size: 15px;
+      color: #aaa;
+      line-height: 1.6;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #888;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #555;
+      margin: 40px 0 20px;
+    }
+
+    .question {
+      background: #161616;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .question label {
+      display: block;
+      font-size: 15px;
+      font-weight: 500;
+      color: #e0e0e0;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .question .hint {
+      font-size: 12px;
+      color: #666;
+      margin-top: -10px;
+      margin-bottom: 14px;
+    }
+
+    .options { display: flex; flex-direction: column; gap: 10px; }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #1e1e1e;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .option:hover {
+      background: #242424;
+      border-color: #3a3a3a;
+    }
+
+    .option input[type="radio"],
+    .option input[type="checkbox"] {
+      accent-color: #f0c040;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .option span {
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    input[type="email"],
+    input[type="text"] {
+      width: 100%;
+      background: #1e1e1e;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: #e0e0e0;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="email"]:focus,
+    input[type="text"]:focus {
+      border-color: #f0c040;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: #f0c040;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 32px;
+      transition: opacity 0.15s;
+    }
+
+    .submit-btn:hover { opacity: 0.9; }
+
+    .footer {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 12px;
+      color: #444;
+    }
+
+    .required { color: #f0c040; margin-left: 2px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <div class="emoji">🎖️</div>
+      <div class="badge">2 minutos • 8 perguntas</div>
+      <h1>Colecionadores de GI Joe — preciso de vocês!</h1>
+      <p>Estou criando um app para catalogar sua coleção, descobrir o valor de cada peça e comprar/vender com outros colecionadores. Antes de codar, quero ouvir quem realmente coleciona.</p>
+    </div>
+
+    <form action="https://formsubmit.co/deco@decomontenegro.com" method="POST">
+
+      <!-- Campos ocultos formsubmit -->
+      <input type="hidden" name="_subject" value="🎖️ Nova resposta — Survey filecard.app">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_next" value="https://decomontenegro.github.io/filecard-app/survey/obrigado.html">
+      <input type="hidden" name="_template" value="table">
+
+      <!-- SEÇÃO 1 -->
+      <div class="section-title">Seção 1 — Seu perfil</div>
+
+      <div class="question">
+        <label>1. Há quanto tempo você coleciona GI Joe? <span class="required">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="tempo_colecao" value="Menos de 1 ano" required><span>Menos de 1 ano</span></label>
+          <label class="option"><input type="radio" name="tempo_colecao" value="1 a 3 anos"><span>1 a 3 anos</span></label>
+          <label class="option"><input type="radio" name="tempo_colecao" value="4 a 10 anos"><span>4 a 10 anos</span></label>
+          <label class="option"><input type="radio" name="tempo_colecao" value="Mais de 10 anos"><span>Mais de 10 anos</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <label>2. Quantas peças você tem na sua coleção? <span class="required">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="qtd_pecas" value="Menos de 20" required><span>Menos de 20</span></label>
+          <label class="option"><input type="radio" name="qtd_pecas" value="20 a 50"><span>20 a 50</span></label>
+          <label class="option"><input type="radio" name="qtd_pecas" value="51 a 150"><span>51 a 150</span></label>
+          <label class="option"><input type="radio" name="qtd_pecas" value="Mais de 150"><span>Mais de 150</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <label>3. Você coleciona outras linhas além de GI Joe?</label>
+        <div class="options">
+          <label class="option"><input type="checkbox" name="outras_linhas" value="Não, só GI Joe"><span>Não, só GI Joe</span></label>
+          <label class="option"><input type="checkbox" name="outras_linhas" value="Hot Wheels"><span>Hot Wheels</span></label>
+          <label class="option"><input type="checkbox" name="outras_linhas" value="Funko Pop"><span>Funko Pop</span></label>
+          <label class="option"><input type="checkbox" name="outras_linhas" value="Marvel Legends / Star Wars Black Series"><span>Marvel Legends / Star Wars Black Series</span></label>
+          <label class="option"><input type="checkbox" name="outras_linhas" value="LEGO"><span>LEGO</span></label>
+          <label class="option"><input type="checkbox" name="outras_linhas" value="Outra"><span>Outra</span></label>
+        </div>
+      </div>
+
+      <!-- SEÇÃO 2 -->
+      <div class="section-title">Seção 2 — Como você organiza hoje</div>
+
+      <div class="question">
+        <label>4. Como você organiza sua coleção hoje? <span class="required">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="organizacao" value="Na memória" required><span>Na memória mesmo</span></label>
+          <label class="option"><input type="radio" name="organizacao" value="Planilha"><span>Planilha (Excel / Google Sheets)</span></label>
+          <label class="option"><input type="radio" name="organizacao" value="Fotos no celular"><span>Fotos no celular</span></label>
+          <label class="option"><input type="radio" name="organizacao" value="App específico"><span>App específico</span></label>
+          <label class="option"><input type="radio" name="organizacao" value="Não organizo"><span>Não organizo</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <label>5. Qual sua maior dificuldade como colecionador?</label>
+        <p class="hint">Pode marcar mais de uma</p>
+        <div class="options">
+          <label class="option"><input type="checkbox" name="dificuldades" value="Saber o valor atual das peças"><span>Saber o valor atual das minhas peças</span></label>
+          <label class="option"><input type="checkbox" name="dificuldades" value="Encontrar peças para comprar"><span>Encontrar peças que quero comprar</span></label>
+          <label class="option"><input type="checkbox" name="dificuldades" value="Vender com preço justo"><span>Vender peças com preço justo</span></label>
+          <label class="option"><input type="checkbox" name="dificuldades" value="Catalogar e organizar"><span>Catalogar e organizar minha coleção</span></label>
+          <label class="option"><input type="checkbox" name="dificuldades" value="Descobrir variações e versões"><span>Descobrir variações e versões de uma figura</span></label>
+        </div>
+      </div>
+
+      <!-- SEÇÃO 3 -->
+      <div class="section-title">Seção 3 — O produto</div>
+
+      <div class="question">
+        <label>6. Se existisse um app com essas funções, quais seriam as 2 mais importantes pra você?</label>
+        <p class="hint">Escolha até 2</p>
+        <div class="options">
+          <label class="option"><input type="checkbox" name="funcoes" value="Catálogo completo com fotos e variações"><span>Catálogo completo de figuras com fotos e variações</span></label>
+          <label class="option"><input type="checkbox" name="funcoes" value="Valor de mercado atualizado"><span>Valor de mercado atualizado de cada peça</span></label>
+          <label class="option"><input type="checkbox" name="funcoes" value="Gestão da coleção"><span>Gestão da minha coleção (o que tenho, o que falta)</span></label>
+          <label class="option"><input type="checkbox" name="funcoes" value="Scan de código de barras"><span>Scan de código de barras para identificar a figura</span></label>
+          <label class="option"><input type="checkbox" name="funcoes" value="Marketplace entre colecionadores"><span>Marketplace para comprar e vender entre colecionadores</span></label>
+          <label class="option"><input type="checkbox" name="funcoes" value="Wishlist e alertas de preço"><span>Wishlist e alertas de preço</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <label>7. Você pagaria por uma versão avançada desse app? <span class="required">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="wtp" value="Sim, até R$10/mês" required><span>Sim, pagaria até R$10/mês</span></label>
+          <label class="option"><input type="radio" name="wtp" value="Sim, R$10-20/mês"><span>Sim, pagaria entre R$10 e R$20/mês</span></label>
+          <label class="option"><input type="radio" name="wtp" value="Sim, mais de R$20/mês"><span>Sim, pagaria mais de R$20/mês</span></label>
+          <label class="option"><input type="radio" name="wtp" value="Só grátis"><span>Só usaria se fosse grátis</span></label>
+          <label class="option"><input type="radio" name="wtp" value="Não usaria"><span>Não usaria nem grátis</span></label>
+        </div>
+      </div>
+
+      <!-- SEÇÃO 4 -->
+      <div class="section-title">Seção 4 — Contato (opcional)</div>
+
+      <div class="question">
+        <label>8. Quer ser beta tester quando o app estiver pronto?</label>
+        <input type="email" name="email_beta" placeholder="seu@email.com (opcional)" />
+      </div>
+
+      <button type="submit" class="submit-btn">Enviar respostas 🎖️</button>
+    </form>
+
+    <p class="footer">Suas respostas são anônimas e serão usadas apenas para desenvolvimento do produto.</p>
+  </div>
+</body>
+</html>
