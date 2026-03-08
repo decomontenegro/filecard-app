@@ -1,0 +1,22 @@
+[
+  { "id": 1, "name": "Snake Eyes", "character": "Snake Eyes", "year": 1982, "series": "ARAH", "accessories": ["Uzi", "backpack", "wolf Timber"], "variants": ["v1 straight-arm", "v2 swivel-arm", "v3 1985"], "marketValueBRL": 850 },
+  { "id": 2, "name": "Duke", "character": "Duke", "year": 1984, "series": "ARAH", "accessories": ["rifle", "backpack", "helmet"], "variants": ["v1 1984", "v2 1992"], "marketValueBRL": 635 },
+  { "id": 3, "name": "Cobra Commander", "character": "Cobra Commander", "year": 1982, "series": "ARAH", "accessories": ["pistol"], "variants": ["v1 straight-arm hooded", "v2 swivel-arm hooded", "v3 battle armor"], "marketValueBRL": 720 },
+  { "id": 4, "name": "Destro", "character": "Destro", "year": 1983, "series": "ARAH", "accessories": ["pistol", "attaché case"], "variants": ["v1 1983", "v2 1988"], "marketValueBRL": 580 },
+  { "id": 5, "name": "Scarlett", "character": "Scarlett", "year": 1982, "series": "ARAH", "accessories": ["crossbow", "backpack"], "variants": ["v1 straight-arm", "v2 swivel-arm"], "marketValueBRL": 590 },
+  { "id": 6, "name": "Zartan", "character": "Zartan", "year": 1984, "series": "ARAH", "accessories": ["swamp skier", "backpack", "helmet"], "variants": ["v1 1984"], "marketValueBRL": 420 },
+  { "id": 7, "name": "Roadblock", "character": "Roadblock", "year": 1984, "series": "ARAH", "accessories": ["M2 machine gun", "tripod"], "variants": ["v1 1984", "v2 1986"], "marketValueBRL": 380 },
+  { "id": 8, "name": "Gung-Ho", "character": "Gung-Ho", "year": 1983, "series": "ARAH", "accessories": ["grenade launcher", "grenades"], "variants": ["v1 1983"], "marketValueBRL": 320 },
+  { "id": 9, "name": "Flint", "character": "Flint", "year": 1985, "series": "ARAH", "accessories": ["shotgun", "beret"], "variants": ["v1 1985"], "marketValueBRL": 290 },
+  { "id": 10, "name": "Storm Shadow", "character": "Storm Shadow", "year": 1984, "series": "ARAH", "accessories": ["bow", "arrows", "sword", "backpack"], "variants": ["v1 1984 white", "v2 1992 red"], "marketValueBRL": 680 },
+  { "id": 11, "name": "Baroness", "character": "Baroness", "year": 1984, "series": "ARAH", "accessories": ["rifle"], "variants": ["v1 1984"], "marketValueBRL": 520 },
+  { "id": 12, "name": "Major Bludd", "character": "Major Bludd", "year": 1983, "series": "ARAH", "accessories": ["rocket launcher"], "variants": ["v1 straight-arm", "v2 swivel-arm"], "marketValueBRL": 410 },
+  { "id": 13, "name": "Beachhead", "character": "Beachhead", "year": 1986, "series": "ARAH", "accessories": ["rifle", "backpack", "balaclava"], "variants": ["v1 1986"], "marketValueBRL": 260 },
+  { "id": 14, "name": "Lady Jaye", "character": "Lady Jaye", "year": 1985, "series": "ARAH", "accessories": ["javelin launcher", "javelins"], "variants": ["v1 1985"], "marketValueBRL": 350 },
+  { "id": 15, "name": "Hawk", "character": "Hawk", "year": 1982, "series": "ARAH", "accessories": ["rifle"], "variants": ["v1 straight-arm", "v2 swivel-arm", "v3 general 1986"], "marketValueBRL": 310 },
+  { "id": 16, "name": "Firefly", "character": "Firefly", "year": 1984, "series": "ARAH", "accessories": ["walkie-talkie", "backpack"], "variants": ["v1 1984"], "marketValueBRL": 490 },
+  { "id": 17, "name": "Tomax", "character": "Tomax", "year": 1985, "series": "ARAH", "accessories": ["pistol"], "variants": ["v1 1985 (sold with Xamot)"], "marketValueBRL": 380 },
+  { "id": 18, "name": "Xamot", "character": "Xamot", "year": 1985, "series": "ARAH", "accessories": ["pistol"], "variants": ["v1 1985 (sold with Tomax)"], "marketValueBRL": 380 },
+  { "id": 19, "name": "Shipwreck", "character": "Shipwreck", "year": 1985, "series": "ARAH", "accessories": ["pistol", "parrot Polly"], "variants": ["v1 1985"], "marketValueBRL": 275 },
+  { "id": 20, "name": "Spirit Iron-Knife", "character": "Spirit", "year": 1984, "series": "ARAH", "accessories": ["rifle", "eagle Freedom"], "variants": ["v1 1984"], "marketValueBRL": 295 }
+]

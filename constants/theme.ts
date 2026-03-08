@@ -1,0 +1,32 @@
+export const theme = {
+  colors: {
+    primary: '#6B7B5A',
+    primaryLight: '#7A8B68',
+    primaryGradientStart: '#6B7B5A',
+    primaryGradientEnd: '#7A8B68',
+    background: '#f5f5f7',
+    surface: '#ffffff',
+    textPrimary: '#000000',
+    textSecondary: '#666666',
+    textMuted: '#999999',
+    appreciation: '#9CAF88',
+    appreciationLight: '#A8B896',
+    success: '#34C759',
+    border: '#e8e8e8',
+    shadow: 'rgba(0,0,0,0.08)',
+  },
+  radius: {
+    card: 16,
+    hero: 20,
+    pill: 20,
+    badge: 8,
+    input: 12,
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 16,
+    lg: 24,
+    xl: 32,
+  },
+};
