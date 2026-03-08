@@ -1,95 +1,127 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View, Text, ScrollView, TextInput, TouchableOpacity,
-  FlatList, Image, StyleSheet, SafeAreaView,
+  View, Text, ScrollView, TouchableOpacity,
+  StyleSheet, SafeAreaView,
 } from 'react-native';
-import { Search } from 'lucide-react-native';
+import { TrendingUp, Package, Plus, BookOpen, Camera } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
-import figuras from '../../db/seed/gijoe-arah.json';
-
-const FILTERS = ['ARAH', '1982', '1983', '1984', '1985'];
-
-const IMAGES: Record<number, string> = {
-  1: 'https://images.unsplash.com/photo-1624308188733-abcf5b36a039?w=400',
-  2: 'https://images.unsplash.com/photo-1771947010805-24a64499c357?w=400',
-  3: 'https://images.unsplash.com/photo-1771667176932-55f9829a04f5?w=400',
-  4: 'https://images.unsplash.com/photo-1769765756589-dea631ec8b0c?w=400',
-  5: 'https://images.unsplash.com/photo-1768969831359-c2e53759876f?w=400',
-};
+import { getCollectionStats, getTopValorizadas } from '../../db/database';
 
 const formatBRL = (v: number) =>
-  `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
+  `R$ ${(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
 
-export default function CatalogScreen() {
-  const [query, setQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('ARAH');
+export default function HomeScreen() {
+  const router = useRouter();
+  const [stats, setStats] = useState({ total_items: 0, total_paid: 0, total_market_value: 0 });
+  const [topItems, setTopItems] = useState<any[]>([]);
 
-  const filtered = figuras.filter(f =>
-    f.name.toLowerCase().includes(query.toLowerCase()) ||
-    f.character.toLowerCase().includes(query.toLowerCase())
-  );
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  const renderFigura = ({ item, index }: { item: typeof figuras[0]; index: number }) => (
-    <TouchableOpacity style={styles.card} activeOpacity={0.85}>
-      <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: IMAGES[item.id] || `https://picsum.photos/seed/${item.id}/400/400` }}
-          style={styles.image}
-          resizeMode="cover"
-        />
-      </View>
-      <View style={styles.cardInfo}>
-        <Text style={styles.cardName}>{item.name}</Text>
-        <View style={styles.cardBottom}>
-          <View style={styles.yearPill}>
-            <Text style={styles.yearText}>{item.year}</Text>
-          </View>
-          <Text style={styles.cardValue}>{formatBRL(item.marketValueBRL)}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+  async function loadData() {
+    try {
+      const s = await getCollectionStats();
+      if (s) setStats(s);
+      const top = await getTopValorizadas(3);
+      setTopItems(top);
+    } catch (e) {
+      // DB pode estar vazio ainda
+    }
+  }
+
+  const appreciation = stats.total_paid > 0
+    ? Math.round((stats.total_market_value - stats.total_paid) / stats.total_paid * 100)
+    : 0;
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <View style={styles.topBar}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
           <Text style={styles.logo}>🎖️ filecard</Text>
-          <TouchableOpacity style={styles.searchIcon}>
-            <Search size={20} color="#fff" />
+          <Text style={styles.greeting}>Sua coleção, seu patrimônio</Text>
+        </View>
+
+        {/* Hero patrimônio */}
+        {stats.total_items > 0 && (
+          <View style={styles.heroCard}>
+            <Text style={styles.heroLabel}>SUA COLEÇÃO VALE</Text>
+            <Text style={styles.heroValue}>{formatBRL(stats.total_market_value)}</Text>
+            <View style={styles.heroStats}>
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatLabel}>INVESTIDO</Text>
+                <Text style={styles.heroStatValue}>{formatBRL(stats.total_paid)}</Text>
+              </View>
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatLabel}>VALORIZAÇÃO</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Text style={styles.heroStatValue}>+{appreciation}%</Text>
+                  <TrendingUp size={16} color="#fff" />
+                </View>
+              </View>
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatLabel}>FIGURAS</Text>
+                <Text style={styles.heroStatValue}>{stats.total_items}</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Atalhos rápidos */}
+        <Text style={styles.sectionLabel}>AÇÕES RÁPIDAS</Text>
+        <View style={styles.shortcuts}>
+          <TouchableOpacity style={styles.shortcut} onPress={() => router.push('/(tabs)/scanner')}>
+            <Camera size={24} color={theme.colors.primary} />
+            <Text style={styles.shortcutText}>Escanear</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.shortcut} onPress={() => router.push('/(tabs)/catalogo')}>
+            <BookOpen size={24} color={theme.colors.primary} />
+            <Text style={styles.shortcutText}>Catálogo</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.shortcut} onPress={() => router.push('/(tabs)/colecao')}>
+            <Package size={24} color={theme.colors.primary} />
+            <Text style={styles.shortcutText}>Coleção</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.shortcut}>
+            <Plus size={24} color={theme.colors.primary} />
+            <Text style={styles.shortcutText}>Adicionar</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.searchBar}>
-          <Search size={16} color="#999" style={{ marginRight: 8 }} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Buscar figuras..."
-            placeholderTextColor="#999"
-            value={query}
-            onChangeText={setQuery}
-          />
-        </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
-          {FILTERS.map(f => (
-            <TouchableOpacity
-              key={f}
-              style={[styles.chip, activeFilter === f && styles.chipActive]}
-              onPress={() => setActiveFilter(f)}
-            >
-              <Text style={[styles.chipText, activeFilter === f && styles.chipTextActive]}>{f}</Text>
+
+        {/* Top valorizadas */}
+        {topItems.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>TOP VALORIZADAS</Text>
+            <View style={styles.topList}>
+              {topItems.map((item, i) => (
+                <View key={i} style={styles.topItem}>
+                  <Text style={styles.topMedal}>{'🥇🥈🥉'[i]}</Text>
+                  <Text style={styles.topName}>{item.display_name}</Text>
+                  <View style={styles.appreciationPill}>
+                    <Text style={styles.appreciationText}>+{item.appreciation_pct}%</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
+        {/* Empty state */}
+        {stats.total_items === 0 && (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyEmoji}>🎖️</Text>
+            <Text style={styles.emptyTitle}>Comece sua coleção</Text>
+            <Text style={styles.emptySubtitle}>Escaneie uma figura ou busque no catálogo</Text>
+            <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push('/(tabs)/catalogo')}>
+              <Text style={styles.emptyBtnText}>Ver Catálogo</Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-      <FlatList
-        data={filtered}
-        renderItem={renderFigura}
-        keyExtractor={item => String(item.id)}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.grid}
-        showsVerticalScrollIndicator={false}
-      />
+          </View>
+        )}
+
+        <View style={{ height: 20 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -98,43 +130,42 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.colors.background },
   header: {
     backgroundColor: theme.colors.primary,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 12,
+    paddingHorizontal: 16, paddingTop: 8, paddingBottom: 20,
   },
-  topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  logo: { color: '#fff', fontSize: 18, fontWeight: '800', letterSpacing: -0.5 },
-  searchIcon: { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20, padding: 8 },
-  searchBar: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 10,
+  logo: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 4 },
+  greeting: { color: 'rgba(255,255,255,0.8)', fontSize: 14 },
+  heroCard: {
+    backgroundColor: theme.colors.primary, margin: 16, borderRadius: 20, padding: 24,
+    shadowColor: theme.colors.primary, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
   },
-  searchInput: { flex: 1, fontSize: 15, color: '#000' },
-  filterRow: { flexDirection: 'row' },
-  chip: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, marginRight: 8,
+  heroLabel: { color: 'rgba(255,255,255,0.75)', fontSize: 11, letterSpacing: 2, fontWeight: '600', marginBottom: 6 },
+  heroValue: { color: '#fff', fontSize: 44, fontWeight: '800', letterSpacing: -2, lineHeight: 52, marginBottom: 16 },
+  heroStats: { flexDirection: 'row', gap: 8 },
+  heroStat: { flex: 1, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12, padding: 10, alignItems: 'center' },
+  heroStatLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 9, letterSpacing: 1, fontWeight: '600', marginBottom: 4 },
+  heroStatValue: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  sectionLabel: { color: '#666', fontSize: 11, letterSpacing: 2, fontWeight: '700', marginHorizontal: 16, marginTop: 20, marginBottom: 10 },
+  shortcuts: { flexDirection: 'row', marginHorizontal: 16, gap: 10 },
+  shortcut: {
+    flex: 1, backgroundColor: '#fff', borderRadius: 14, padding: 14,
+    alignItems: 'center', gap: 6,
+    shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 6, elevation: 2,
   },
-  chipActive: { backgroundColor: '#fff' },
-  chipText: { color: '#fff', fontWeight: '600', fontSize: 13 },
-  chipTextActive: { color: theme.colors.primary },
-  grid: { padding: 12 },
-  row: { justifyContent: 'space-between', marginBottom: 12 },
-  card: {
-    backgroundColor: '#fff', borderRadius: 16, width: '48%',
-    overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.08,
-    shadowRadius: 8, elevation: 3,
+  shortcutText: { fontSize: 11, fontWeight: '600', color: '#333' },
+  topList: { marginHorizontal: 16, gap: 10 },
+  topItem: {
+    backgroundColor: '#fff', borderRadius: 14, padding: 14,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, elevation: 1,
   },
-  imageContainer: { width: '100%', aspectRatio: 1, backgroundColor: '#f0f0f0' },
-  image: { width: '100%', height: '100%' },
-  cardInfo: { padding: 10 },
-  cardName: { fontSize: 14, fontWeight: '700', color: '#000', marginBottom: 6 },
-  cardBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  yearPill: {
-    backgroundColor: theme.colors.primary, borderRadius: 8,
-    paddingHorizontal: 8, paddingVertical: 3,
-  },
-  yearText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-  cardValue: { fontSize: 14, fontWeight: '700', color: '#000' },
+  topMedal: { fontSize: 20 },
+  topName: { flex: 1, fontSize: 14, fontWeight: '600', color: '#000' },
+  appreciationPill: { backgroundColor: theme.colors.appreciation, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
+  appreciationText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  emptyState: { alignItems: 'center', padding: 40 },
+  emptyEmoji: { fontSize: 48, marginBottom: 16 },
+  emptyTitle: { fontSize: 20, fontWeight: '700', color: '#000', marginBottom: 8 },
+  emptySubtitle: { fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 24 },
+  emptyBtn: { backgroundColor: theme.colors.primary, borderRadius: 14, paddingHorizontal: 24, paddingVertical: 14 },
+  emptyBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });

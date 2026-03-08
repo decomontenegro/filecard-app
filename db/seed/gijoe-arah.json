@@ -1,22 +1,309 @@
 [
-  { "id": 1, "name": "Snake Eyes", "character": "Snake Eyes", "year": 1982, "series": "ARAH", "accessories": ["Uzi", "backpack", "wolf Timber"], "variants": ["v1 straight-arm", "v2 swivel-arm", "v3 1985"], "marketValueBRL": 850 },
-  { "id": 2, "name": "Duke", "character": "Duke", "year": 1984, "series": "ARAH", "accessories": ["rifle", "backpack", "helmet"], "variants": ["v1 1984", "v2 1992"], "marketValueBRL": 635 },
-  { "id": 3, "name": "Cobra Commander", "character": "Cobra Commander", "year": 1982, "series": "ARAH", "accessories": ["pistol"], "variants": ["v1 straight-arm hooded", "v2 swivel-arm hooded", "v3 battle armor"], "marketValueBRL": 720 },
-  { "id": 4, "name": "Destro", "character": "Destro", "year": 1983, "series": "ARAH", "accessories": ["pistol", "attaché case"], "variants": ["v1 1983", "v2 1988"], "marketValueBRL": 580 },
-  { "id": 5, "name": "Scarlett", "character": "Scarlett", "year": 1982, "series": "ARAH", "accessories": ["crossbow", "backpack"], "variants": ["v1 straight-arm", "v2 swivel-arm"], "marketValueBRL": 590 },
-  { "id": 6, "name": "Zartan", "character": "Zartan", "year": 1984, "series": "ARAH", "accessories": ["swamp skier", "backpack", "helmet"], "variants": ["v1 1984"], "marketValueBRL": 420 },
-  { "id": 7, "name": "Roadblock", "character": "Roadblock", "year": 1984, "series": "ARAH", "accessories": ["M2 machine gun", "tripod"], "variants": ["v1 1984", "v2 1986"], "marketValueBRL": 380 },
-  { "id": 8, "name": "Gung-Ho", "character": "Gung-Ho", "year": 1983, "series": "ARAH", "accessories": ["grenade launcher", "grenades"], "variants": ["v1 1983"], "marketValueBRL": 320 },
-  { "id": 9, "name": "Flint", "character": "Flint", "year": 1985, "series": "ARAH", "accessories": ["shotgun", "beret"], "variants": ["v1 1985"], "marketValueBRL": 290 },
-  { "id": 10, "name": "Storm Shadow", "character": "Storm Shadow", "year": 1984, "series": "ARAH", "accessories": ["bow", "arrows", "sword", "backpack"], "variants": ["v1 1984 white", "v2 1992 red"], "marketValueBRL": 680 },
-  { "id": 11, "name": "Baroness", "character": "Baroness", "year": 1984, "series": "ARAH", "accessories": ["rifle"], "variants": ["v1 1984"], "marketValueBRL": 520 },
-  { "id": 12, "name": "Major Bludd", "character": "Major Bludd", "year": 1983, "series": "ARAH", "accessories": ["rocket launcher"], "variants": ["v1 straight-arm", "v2 swivel-arm"], "marketValueBRL": 410 },
-  { "id": 13, "name": "Beachhead", "character": "Beachhead", "year": 1986, "series": "ARAH", "accessories": ["rifle", "backpack", "balaclava"], "variants": ["v1 1986"], "marketValueBRL": 260 },
-  { "id": 14, "name": "Lady Jaye", "character": "Lady Jaye", "year": 1985, "series": "ARAH", "accessories": ["javelin launcher", "javelins"], "variants": ["v1 1985"], "marketValueBRL": 350 },
-  { "id": 15, "name": "Hawk", "character": "Hawk", "year": 1982, "series": "ARAH", "accessories": ["rifle"], "variants": ["v1 straight-arm", "v2 swivel-arm", "v3 general 1986"], "marketValueBRL": 310 },
-  { "id": 16, "name": "Firefly", "character": "Firefly", "year": 1984, "series": "ARAH", "accessories": ["walkie-talkie", "backpack"], "variants": ["v1 1984"], "marketValueBRL": 490 },
-  { "id": 17, "name": "Tomax", "character": "Tomax", "year": 1985, "series": "ARAH", "accessories": ["pistol"], "variants": ["v1 1985 (sold with Xamot)"], "marketValueBRL": 380 },
-  { "id": 18, "name": "Xamot", "character": "Xamot", "year": 1985, "series": "ARAH", "accessories": ["pistol"], "variants": ["v1 1985 (sold with Tomax)"], "marketValueBRL": 380 },
-  { "id": 19, "name": "Shipwreck", "character": "Shipwreck", "year": 1985, "series": "ARAH", "accessories": ["pistol", "parrot Polly"], "variants": ["v1 1985"], "marketValueBRL": 275 },
-  { "id": 20, "name": "Spirit Iron-Knife", "character": "Spirit", "year": 1984, "series": "ARAH", "accessories": ["rifle", "eagle Freedom"], "variants": ["v1 1984"], "marketValueBRL": 295 }
+  {
+    "id": 1, "product_line_id": 1, "release_id": 1,
+    "canonical_name": "snake-eyes-v1", "display_name": "Snake Eyes",
+    "slug": "snake-eyes-v1", "year": 1982, "era": "ARAH",
+    "description": "Commandos. Straight-arm variant. First release.",
+    "rarity_level": 5, "complexity_score": 4, "market_value_brl": 850,
+    "image_url": "https://images.unsplash.com/photo-1624308188733-abcf5b36a039?w=400",
+    "accessories": [
+      {"name": "Uzi", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Backpack", "accessory_type": "gear", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 Straight-arm", "variant_type": "mold", "distinguishing_features": "Straight arm articulation, no thumb gap"},
+      {"variant_name": "v2 Swivel-arm", "variant_type": "mold", "distinguishing_features": "Swivel arm articulation, thumb gap visible"}
+    ]
+  },
+  {
+    "id": 2, "product_line_id": 1, "release_id": 3,
+    "canonical_name": "duke-v1", "display_name": "Duke",
+    "slug": "duke-v1", "year": 1984, "era": "ARAH",
+    "description": "First Sergeant. Classic GI Joe leader.",
+    "rarity_level": 4, "complexity_score": 3, "market_value_brl": 635,
+    "image_url": "https://images.unsplash.com/photo-1771947010805-24a64499c357?w=400",
+    "accessories": [
+      {"name": "Rifle", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Backpack", "accessory_type": "gear", "required_for_complete": true},
+      {"name": "Helmet", "accessory_type": "gear", "required_for_complete": false}
+    ],
+    "variants": [
+      {"variant_name": "v1 1984", "variant_type": "release", "distinguishing_features": "Original release, tan uniform"}
+    ]
+  },
+  {
+    "id": 3, "product_line_id": 1, "release_id": 1,
+    "canonical_name": "cobra-commander-v1", "display_name": "Cobra Commander",
+    "slug": "cobra-commander-v1", "year": 1982, "era": "ARAH",
+    "description": "Supreme leader of Cobra. Hooded variant.",
+    "rarity_level": 5, "complexity_score": 4, "market_value_brl": 720,
+    "image_url": "https://images.unsplash.com/photo-1771667176932-55f9829a04f5?w=400",
+    "accessories": [
+      {"name": "Pistol", "accessory_type": "weapon", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 Hooded Straight-arm", "variant_type": "mold", "distinguishing_features": "Hood, straight arm"},
+      {"variant_name": "v2 Hooded Swivel-arm", "variant_type": "mold", "distinguishing_features": "Hood, swivel arm"},
+      {"variant_name": "v3 Battle Armor", "variant_type": "mold", "distinguishing_features": "Battle armor, 1987"}
+    ]
+  },
+  {
+    "id": 4, "product_line_id": 1, "release_id": 2,
+    "canonical_name": "destro-v1", "display_name": "Destro",
+    "slug": "destro-v1", "year": 1983, "era": "ARAH",
+    "description": "Arms dealer. Silver mask. MARS Industries.",
+    "rarity_level": 4, "complexity_score": 3, "market_value_brl": 580,
+    "image_url": "https://images.unsplash.com/photo-1769765756589-dea631ec8b0c?w=400",
+    "accessories": [
+      {"name": "Pistol", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Attaché Case", "accessory_type": "gear", "required_for_complete": false}
+    ],
+    "variants": [
+      {"variant_name": "v1 1983", "variant_type": "release", "distinguishing_features": "Original, black uniform"}
+    ]
+  },
+  {
+    "id": 5, "product_line_id": 1, "release_id": 1,
+    "canonical_name": "scarlett-v1", "display_name": "Scarlett",
+    "slug": "scarlett-v1", "year": 1982, "era": "ARAH",
+    "description": "Counter-intelligence. First female GI Joe figure.",
+    "rarity_level": 4, "complexity_score": 3, "market_value_brl": 590,
+    "image_url": "https://images.unsplash.com/photo-1768969831359-c2e53759876f?w=400",
+    "accessories": [
+      {"name": "Crossbow", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Backpack", "accessory_type": "gear", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 Straight-arm", "variant_type": "mold", "distinguishing_features": "Straight arm"},
+      {"variant_name": "v2 Swivel-arm", "variant_type": "mold", "distinguishing_features": "Swivel arm"}
+    ]
+  },
+  {
+    "id": 6, "product_line_id": 1, "release_id": 3,
+    "canonical_name": "zartan-v1", "display_name": "Zartan",
+    "slug": "zartan-v1", "year": 1984, "era": "ARAH",
+    "description": "Master of disguise. Dreadnok leader. Color-changing plastic.",
+    "rarity_level": 4, "complexity_score": 5, "market_value_brl": 420,
+    "image_url": null,
+    "accessories": [
+      {"name": "Helmet", "accessory_type": "gear", "required_for_complete": true},
+      {"name": "Backpack", "accessory_type": "gear", "required_for_complete": true},
+      {"name": "Swamp Skier", "accessory_type": "vehicle", "required_for_complete": false}
+    ],
+    "variants": [
+      {"variant_name": "v1 1984", "variant_type": "release", "distinguishing_features": "Color-sensitive plastic, includes swamp skier"}
+    ]
+  },
+  {
+    "id": 7, "product_line_id": 1, "release_id": 3,
+    "canonical_name": "roadblock-v1", "display_name": "Roadblock",
+    "slug": "roadblock-v1", "year": 1984, "era": "ARAH",
+    "description": "Heavy machine gunner. Rhyming cook.",
+    "rarity_level": 3, "complexity_score": 3, "market_value_brl": 380,
+    "image_url": null,
+    "accessories": [
+      {"name": "M2 Machine Gun", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Tripod", "accessory_type": "gear", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 1984", "variant_type": "release", "distinguishing_features": "Original dark green"},
+      {"variant_name": "v2 1986", "variant_type": "release", "distinguishing_features": "Tiger Force variant"}
+    ]
+  },
+  {
+    "id": 8, "product_line_id": 1, "release_id": 2,
+    "canonical_name": "gung-ho-v1", "display_name": "Gung-Ho",
+    "slug": "gung-ho-v1", "year": 1983, "era": "ARAH",
+    "description": "Marine. Distinctive chest tattoo. Grenadier.",
+    "rarity_level": 3, "complexity_score": 3, "market_value_brl": 320,
+    "image_url": null,
+    "accessories": [
+      {"name": "Grenade Launcher", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Grenades", "accessory_type": "gear", "required_for_complete": false}
+    ],
+    "variants": [
+      {"variant_name": "v1 1983", "variant_type": "release", "distinguishing_features": "Open chest shirt, blue pants"}
+    ]
+  },
+  {
+    "id": 9, "product_line_id": 1, "release_id": 4,
+    "canonical_name": "flint-v1", "display_name": "Flint",
+    "slug": "flint-v1", "year": 1985, "era": "ARAH",
+    "description": "Warrant Officer. Beret. Lady Jaye's love interest.",
+    "rarity_level": 3, "complexity_score": 3, "market_value_brl": 290,
+    "image_url": null,
+    "accessories": [
+      {"name": "Shotgun", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Beret", "accessory_type": "gear", "required_for_complete": false}
+    ],
+    "variants": [
+      {"variant_name": "v1 1985", "variant_type": "release", "distinguishing_features": "Original, tan beret"}
+    ]
+  },
+  {
+    "id": 10, "product_line_id": 1, "release_id": 3,
+    "canonical_name": "storm-shadow-v1", "display_name": "Storm Shadow",
+    "slug": "storm-shadow-v1", "year": 1984, "era": "ARAH",
+    "description": "Cobra ninja. Snake Eyes' nemesis. White uniform.",
+    "rarity_level": 5, "complexity_score": 4, "market_value_brl": 680,
+    "image_url": null,
+    "accessories": [
+      {"name": "Bow", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Arrows", "accessory_type": "gear", "required_for_complete": true},
+      {"name": "Sword", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Backpack", "accessory_type": "gear", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 1984 White", "variant_type": "release", "distinguishing_features": "White ninja uniform"},
+      {"variant_name": "v2 1992 Red", "variant_type": "release", "distinguishing_features": "Red uniform, GI Joe turncoat"}
+    ]
+  },
+  {
+    "id": 11, "product_line_id": 1, "release_id": 3,
+    "canonical_name": "baroness-v1", "display_name": "Baroness",
+    "slug": "baroness-v1", "year": 1984, "era": "ARAH",
+    "description": "Cobra intelligence officer. Glasses. Black leather.",
+    "rarity_level": 4, "complexity_score": 3, "market_value_brl": 520,
+    "image_url": null,
+    "accessories": [
+      {"name": "Rifle", "accessory_type": "weapon", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 1984", "variant_type": "release", "distinguishing_features": "Black uniform, glasses"}
+    ]
+  },
+  {
+    "id": 12, "product_line_id": 1, "release_id": 2,
+    "canonical_name": "major-bludd-v1", "display_name": "Major Bludd",
+    "slug": "major-bludd-v1", "year": 1983, "era": "ARAH",
+    "description": "Cobra mercenary. Rocket arm. Australian accent.",
+    "rarity_level": 4, "complexity_score": 3, "market_value_brl": 410,
+    "image_url": null,
+    "accessories": [
+      {"name": "Rocket Launcher", "accessory_type": "weapon", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 Straight-arm", "variant_type": "mold", "distinguishing_features": "Straight arm variant"},
+      {"variant_name": "v2 Swivel-arm", "variant_type": "mold", "distinguishing_features": "Swivel arm variant"}
+    ]
+  },
+  {
+    "id": 13, "product_line_id": 1, "release_id": 5,
+    "canonical_name": "beachhead-v1", "display_name": "Beachhead",
+    "slug": "beachhead-v1", "year": 1986, "era": "ARAH",
+    "description": "Ranger. Balaclava. Ranger School instructor.",
+    "rarity_level": 3, "complexity_score": 3, "market_value_brl": 260,
+    "image_url": null,
+    "accessories": [
+      {"name": "Rifle", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Backpack", "accessory_type": "gear", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 1986", "variant_type": "release", "distinguishing_features": "Green balaclava, ranger uniform"}
+    ]
+  },
+  {
+    "id": 14, "product_line_id": 1, "release_id": 4,
+    "canonical_name": "lady-jaye-v1", "display_name": "Lady Jaye",
+    "slug": "lady-jaye-v1", "year": 1985, "era": "ARAH",
+    "description": "Covert operations. Javelin launcher. Flint's partner.",
+    "rarity_level": 3, "complexity_score": 3, "market_value_brl": 350,
+    "image_url": null,
+    "accessories": [
+      {"name": "Javelin Launcher", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Javelins", "accessory_type": "gear", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 1985", "variant_type": "release", "distinguishing_features": "Green cap, javelin launcher"}
+    ]
+  },
+  {
+    "id": 15, "product_line_id": 1, "release_id": 1,
+    "canonical_name": "hawk-v1", "display_name": "Hawk",
+    "slug": "hawk-v1", "year": 1982, "era": "ARAH",
+    "description": "Commanding General. GI Joe leader.",
+    "rarity_level": 3, "complexity_score": 3, "market_value_brl": 310,
+    "image_url": null,
+    "accessories": [
+      {"name": "Rifle", "accessory_type": "weapon", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 Straight-arm", "variant_type": "mold", "distinguishing_features": "Straight arm"},
+      {"variant_name": "v2 Swivel-arm", "variant_type": "mold", "distinguishing_features": "Swivel arm"},
+      {"variant_name": "v3 General 1986", "variant_type": "release", "distinguishing_features": "Dress uniform, general rank"}
+    ]
+  },
+  {
+    "id": 16, "product_line_id": 1, "release_id": 3,
+    "canonical_name": "firefly-v1", "display_name": "Firefly",
+    "slug": "firefly-v1", "year": 1984, "era": "ARAH",
+    "description": "Cobra saboteur. Grey camouflage. Explosives expert.",
+    "rarity_level": 4, "complexity_score": 3, "market_value_brl": 490,
+    "image_url": null,
+    "accessories": [
+      {"name": "Walkie-talkie", "accessory_type": "gear", "required_for_complete": true},
+      {"name": "Backpack", "accessory_type": "gear", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 1984", "variant_type": "release", "distinguishing_features": "Grey camo, balaclava"}
+    ]
+  },
+  {
+    "id": 17, "product_line_id": 1, "release_id": 4,
+    "canonical_name": "tomax-v1", "display_name": "Tomax",
+    "slug": "tomax-v1", "year": 1985, "era": "ARAH",
+    "description": "Crimson Guardsman. Twin brother of Xamot. Corporate raider.",
+    "rarity_level": 4, "complexity_score": 4, "market_value_brl": 380,
+    "image_url": null,
+    "accessories": [
+      {"name": "Pistol", "accessory_type": "weapon", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 1985", "variant_type": "release", "distinguishing_features": "Crimson uniform, sold with Xamot"}
+    ]
+  },
+  {
+    "id": 18, "product_line_id": 1, "release_id": 4,
+    "canonical_name": "xamot-v1", "display_name": "Xamot",
+    "slug": "xamot-v1", "year": 1985, "era": "ARAH",
+    "description": "Crimson Guardsman. Twin brother of Tomax. Scar on cheek.",
+    "rarity_level": 4, "complexity_score": 4, "market_value_brl": 380,
+    "image_url": null,
+    "accessories": [
+      {"name": "Pistol", "accessory_type": "weapon", "required_for_complete": true}
+    ],
+    "variants": [
+      {"variant_name": "v1 1985", "variant_type": "release", "distinguishing_features": "Crimson uniform, facial scar, sold with Tomax"}
+    ]
+  },
+  {
+    "id": 19, "product_line_id": 1, "release_id": 4,
+    "canonical_name": "shipwreck-v1", "display_name": "Shipwreck",
+    "slug": "shipwreck-v1", "year": 1985, "era": "ARAH",
+    "description": "Navy SEAL. Sailor hat. Parrot Polly.",
+    "rarity_level": 3, "complexity_score": 3, "market_value_brl": 275,
+    "image_url": null,
+    "accessories": [
+      {"name": "Pistol", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Polly (parrot)", "accessory_type": "companion", "required_for_complete": false}
+    ],
+    "variants": [
+      {"variant_name": "v1 1985", "variant_type": "release", "distinguishing_features": "Sailor uniform, white hat, parrot"}
+    ]
+  },
+  {
+    "id": 20, "product_line_id": 1, "release_id": 3,
+    "canonical_name": "spirit-iron-knife-v1", "display_name": "Spirit Iron-Knife",
+    "slug": "spirit-iron-knife-v1", "year": 1984, "era": "ARAH",
+    "description": "Infantry tracker. Native American. Eagle Freedom companion.",
+    "rarity_level": 3, "complexity_score": 4, "market_value_brl": 295,
+    "image_url": null,
+    "accessories": [
+      {"name": "Rifle", "accessory_type": "weapon", "required_for_complete": true},
+      {"name": "Freedom (eagle)", "accessory_type": "companion", "required_for_complete": false}
+    ],
+    "variants": [
+      {"variant_name": "v1 1984", "variant_type": "release", "distinguishing_features": "Tan uniform, eagle companion"}
+    ]
+  }
 ]

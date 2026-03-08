@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { BookOpen, Package, TrendingUp } from 'lucide-react-native';
+import { BookOpen, Package, Camera, Home, User } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 
 export default function TabLayout() {
@@ -22,8 +22,23 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="catalogo"
+        options={{
           title: 'Catálogo',
           tabBarIcon: ({ color, size }) => <BookOpen size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="scanner"
+        options={{
+          title: 'Scanner',
+          tabBarIcon: ({ color, size }) => <Camera size={size} color={color} />,
+          tabBarIconStyle: { marginTop: -4 },
         }}
       />
       <Tabs.Screen
@@ -34,10 +49,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="valor"
+        name="perfil"
         options={{
-          title: 'Valor',
-          tabBarIcon: ({ color, size }) => <TrendingUp size={size} color={color} />,
+          title: 'Perfil',
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
     </Tabs>
