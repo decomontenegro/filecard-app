@@ -6,6 +6,8 @@ export const theme = {
     primaryGradientEnd: '#7A8B68',
     background: '#f5f5f7',
     surface: '#ffffff',
+    card: '#ffffff',
+    text: '#000000',
     textPrimary: '#000000',
     textSecondary: '#666666',
     textMuted: '#999999',
