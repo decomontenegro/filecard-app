@@ -3,17 +3,24 @@ import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Image,
   ActivityIndicator, ScrollView,
 } from 'react-native';
-import { Camera, Upload, CheckCircle, XCircle, ChevronRight } from 'lucide-react-native';
+import { Camera, Upload, CheckCircle, XCircle } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
-import { getCatalogItems } from '../../db/database';
+import { getCatalogItems, addToCollection } from '../../lib/supabase-queries';
+import { useAuth } from '../../context/AuthContext';
+
 
 type ScanState = 'idle' | 'processing' | 'results' | 'confirmed';
 
 export default function ScannerScreen() {
+  const router = useRouter();
+  const { user } = useAuth();
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<any[]>([]);
+  const [selectedCandidate, setSelectedCandidate] = useState<any | null>(null);
+  const [adding, setAdding] = useState(false);
 
   async function pickImage() {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -44,25 +51,45 @@ export default function ScannerScreen() {
 
   async function analyzeImage() {
     setScanState('processing');
-    // Simula análise AI (fase 1: top match simples do catálogo)
-    await new Promise(r => setTimeout(r, 2000));
-    const allItems = await getCatalogItems();
-    // Simula candidatos (fase 1: retorna top 3 por market value)
-    const top3 = allItems
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 3)
-      .map((item, i) => ({ ...item, confidence: Math.round(90 - i * 18) }));
-    setCandidates(top3);
-    setScanState('results');
+    try {
+      // Fase 1: busca simples no catálogo (sem embeddings ainda)
+      // Pega os primeiros itens do catálogo como candidatos
+      const allItems = await getCatalogItems({ pageSize: 50 });
+      // Simula ranking por relevância (Fase 2 vai usar embeddings pgvector)
+      const shuffled = [...allItems].sort(() => Math.random() - 0.5);
+      const top3 = shuffled.slice(0, 3).map((item, i) => ({
+        ...item,
+        confidence: Math.round(90 - i * 18),
+      }));
+      setCandidates(top3);
+      setSelectedCandidate(top3[0]);
+      setScanState('results');
+    } catch (e) {
+      setScanState('idle');
+    }
+  }
+
+  async function confirmAdd() {
+    if (!user || !selectedCandidate) return;
+    setAdding(true);
+    try {
+      await addToCollection(user.id, selectedCandidate.id, 'C8');
+      setScanState('confirmed');
+    } catch (e) {
+      // silencioso
+    } finally {
+      setAdding(false);
+    }
   }
 
   function reset() {
     setScanState('idle');
     setSelectedImage(null);
     setCandidates([]);
+    setSelectedCandidate(null);
   }
 
-  const formatBRL = (v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
+  const formatBRL = (v: number) => v > 0 ? `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}` : '—';
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -99,7 +126,7 @@ export default function ScannerScreen() {
           )}
           <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 24 }} />
           <Text style={styles.processingText}>Analisando figura...</Text>
-          <Text style={styles.processingSubtext}>Comparando com catálogo de 20 figuras ARAH</Text>
+          <Text style={styles.processingSubtext}>Comparando com catálogo GI Joe ARAH</Text>
         </View>
       )}
 
@@ -110,25 +137,53 @@ export default function ScannerScreen() {
           )}
           <Text style={styles.resultsTitle}>Candidatos encontrados</Text>
           {candidates.map((item, i) => (
-            <TouchableOpacity key={item.id} style={[styles.candidateCard, i === 0 && styles.candidateCardTop]}>
+            <TouchableOpacity
+              key={item.id}
+              style={[
+                styles.candidateCard,
+                selectedCandidate?.id === item.id && styles.candidateCardSelected,
+              ]}
+              onPress={() => setSelectedCandidate(item)}
+            >
               <View style={styles.candidateRank}>
                 <Text style={styles.candidateRankText}>{'🥇🥈🥉'[i]}</Text>
               </View>
               <View style={styles.candidateInfo}>
                 <Text style={styles.candidateName}>{item.display_name}</Text>
-                <Text style={styles.candidateYear}>{item.year} • {item.line_name}</Text>
-                <Text style={styles.candidateValue}>{formatBRL(item.market_value_brl)}</Text>
+                <Text style={styles.candidateYear}>{item.year}</Text>
+                <Text style={styles.candidateValue}>{formatBRL(item.market_value_brl ?? 0)}</Text>
               </View>
-              <View style={[styles.confidenceBadge, { backgroundColor: i === 0 ? theme.colors.success : '#e0e0e0' }]}>
-                <Text style={[styles.confidenceText, { color: i === 0 ? '#fff' : '#666' }]}>{item.confidence}%</Text>
+              <View style={[
+                styles.confidenceBadge,
+                { backgroundColor: i === 0 ? theme.colors.primary : '#e0e0e0' },
+              ]}>
+                <Text style={[styles.confidenceText, { color: i === 0 ? '#fff' : '#666' }]}>
+                  {item.confidence}%
+                </Text>
               </View>
             </TouchableOpacity>
           ))}
           <View style={styles.resultsActions}>
-            <TouchableOpacity style={styles.btnPrimary} onPress={() => setScanState('confirmed')}>
-              <CheckCircle size={18} color="#fff" />
-              <Text style={styles.btnPrimaryText}>Adicionar à Coleção</Text>
-            </TouchableOpacity>
+            {user ? (
+              <TouchableOpacity
+                style={[styles.btnPrimary, adding && styles.btnDisabled]}
+                onPress={confirmAdd}
+                disabled={adding}
+              >
+                {adding ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <CheckCircle size={18} color="#fff" />
+                )}
+                <Text style={styles.btnPrimaryText}>
+                  {adding ? 'Adicionando...' : 'Adicionar à Coleção'}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.loginHint}>
+                <Text style={styles.loginHintText}>Faça login para adicionar à coleção</Text>
+              </View>
+            )}
             <TouchableOpacity style={styles.btnSecondary} onPress={reset}>
               <XCircle size={18} color={theme.colors.primary} />
               <Text style={styles.btnSecondaryText}>Nova Foto</Text>
@@ -141,9 +196,14 @@ export default function ScannerScreen() {
         <View style={styles.confirmedContainer}>
           <Text style={styles.confirmedEmoji}>✅</Text>
           <Text style={styles.confirmedTitle}>Adicionado!</Text>
-          <Text style={styles.confirmedSubtitle}>{candidates[0]?.display_name} foi adicionado à sua coleção</Text>
-          <TouchableOpacity style={styles.btnPrimary} onPress={reset}>
-            <Text style={styles.btnPrimaryText}>Escanear outra figura</Text>
+          <Text style={styles.confirmedSubtitle}>
+            {selectedCandidate?.display_name} foi adicionado à sua coleção
+          </Text>
+          <TouchableOpacity style={styles.btnPrimary} onPress={() => router.push('/(tabs)/colecao')}>
+            <Text style={styles.btnPrimaryText}>Ver Coleção</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.btnSecondary, { marginTop: 12 }]} onPress={reset}>
+            <Text style={styles.btnSecondaryText}>Escanear outra figura</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -171,6 +231,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14, flexDirection: 'row', alignItems: 'center',
     justifyContent: 'center', gap: 8,
   },
+  btnDisabled: { opacity: 0.6 },
   btnPrimaryText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   btnSecondary: {
     flex: 1, backgroundColor: '#fff', borderRadius: 14,
@@ -189,8 +250,9 @@ const styles = StyleSheet.create({
   candidateCard: {
     backgroundColor: '#fff', borderRadius: 16, padding: 14, flexDirection: 'row',
     alignItems: 'center', gap: 12, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+    borderWidth: 2, borderColor: 'transparent',
   },
-  candidateCardTop: { borderWidth: 2, borderColor: theme.colors.primary },
+  candidateCardSelected: { borderColor: theme.colors.primary },
   candidateRank: { width: 32, alignItems: 'center' },
   candidateRankText: { fontSize: 22 },
   candidateInfo: { flex: 1 },
@@ -199,7 +261,11 @@ const styles = StyleSheet.create({
   candidateValue: { color: theme.colors.primary, fontSize: 14, fontWeight: '700', marginTop: 2 },
   confidenceBadge: { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5 },
   confidenceText: { fontSize: 13, fontWeight: '700' },
-  resultsActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  resultsActions: { gap: 12, marginTop: 8 },
+  loginHint: {
+    backgroundColor: '#f5f5f5', borderRadius: 14, padding: 14, alignItems: 'center',
+  },
+  loginHintText: { color: '#666', fontSize: 14 },
   confirmedContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
   confirmedEmoji: { fontSize: 64, marginBottom: 16 },
   confirmedTitle: { fontSize: 28, fontWeight: '800', color: '#000', marginBottom: 8 },

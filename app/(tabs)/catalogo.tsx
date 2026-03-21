@@ -1,45 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
-  View, Text, ScrollView, TextInput, TouchableOpacity,
+  View, Text, TextInput, TouchableOpacity,
   FlatList, Image, StyleSheet, SafeAreaView, ActivityIndicator,
+  ScrollView,
 } from 'react-native';
-import { Search, Star } from 'lucide-react-native';
+import { Search, Plus } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
-import { getCatalogItems } from '../../db/database';
+import { useCatalog } from '../../hooks/useCatalog';
+import { useAuth } from '../../context/AuthContext';
+import { useCollection } from '../../hooks/useCollection';
 
-const FILTERS = ['Todos', '1982', '1983', '1984', '1985', '1986'];
+import { CatalogItem } from '../../lib/supabase-queries';
 
-const formatBRL = (v: number) =>
-  `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
-
+const YEAR_FILTERS = ['Todos', '1982', '1983', '1984', '1985', '1986', '1987', '1988'];
 const RARITY_COLORS = ['', '#999', '#4CAF50', '#2196F3', '#FF9800', '#F44336'];
 
+const formatBRL = (v: number) =>
+  v > 0 ? `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}` : '—';
+
 export default function CatalogoScreen() {
+  const { user } = useAuth();
   const [query, setQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('Todos');
-  const [items, setItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [activeYear, setActiveYear] = useState('Todos');
+  const [addingId, setAddingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadItems();
-  }, [query]);
+  const yearFilter = activeYear === 'Todos' ? undefined : parseInt(activeYear, 10);
 
-  async function loadItems() {
-    setLoading(true);
+  const { items, loading, loadingMore, error, loadMore, refresh } = useCatalog({
+    search: query.length >= 2 ? query : undefined,
+    year: yearFilter,
+  });
+
+  const { add: addToCollection } = useCollection(user?.id ?? null);
+
+  const handleAdd = useCallback(async (item: CatalogItem) => {
+    if (!user) return;
+    setAddingId(item.id);
     try {
-      const data = await getCatalogItems(query || undefined);
-      setItems(data);
+      await addToCollection(item.id, 'C8');
     } catch (e) {
-      console.error(e);
+      // silencioso na UI
+    } finally {
+      setAddingId(null);
     }
-    setLoading(false);
-  }
+  }, [user, addToCollection]);
 
-  const filtered = activeFilter === 'Todos'
-    ? items
-    : items.filter(i => String(i.year) === activeFilter);
-
-  const renderItem = ({ item }: { item: any }) => (
+  const renderItem = ({ item }: { item: CatalogItem & { market_value_brl?: number } }) => (
     <TouchableOpacity style={styles.card} activeOpacity={0.85}>
       <View style={styles.imageContainer}>
         {item.image_url ? (
@@ -49,7 +55,9 @@ export default function CatalogoScreen() {
             <Text style={styles.imagePlaceholderText}>🎖️</Text>
           </View>
         )}
-        <View style={[styles.rarityDot, { backgroundColor: RARITY_COLORS[item.rarity_level] || '#999' }]} />
+        {item.rarity_level && item.rarity_level > 0 && (
+          <View style={[styles.rarityDot, { backgroundColor: RARITY_COLORS[item.rarity_level] ?? '#999' }]} />
+        )}
       </View>
       <View style={styles.cardInfo}>
         <Text style={styles.cardName} numberOfLines={2}>{item.display_name}</Text>
@@ -57,8 +65,24 @@ export default function CatalogoScreen() {
           <View style={styles.yearPill}>
             <Text style={styles.yearText}>{item.year}</Text>
           </View>
-          <Text style={styles.cardValue}>{formatBRL(item.market_value_brl)}</Text>
+          <Text style={styles.cardValue}>{formatBRL((item as any).market_value_brl ?? 0)}</Text>
         </View>
+        {user && (
+          <TouchableOpacity
+            style={styles.addBtn}
+            onPress={() => handleAdd(item)}
+            disabled={addingId === item.id}
+          >
+            {addingId === item.id ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Plus size={12} color="#fff" />
+                <Text style={styles.addBtnText}>Coleção</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -78,13 +102,13 @@ export default function CatalogoScreen() {
           />
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
-          {FILTERS.map(f => (
+          {YEAR_FILTERS.map(f => (
             <TouchableOpacity
               key={f}
-              style={[styles.chip, activeFilter === f && styles.chipActive]}
-              onPress={() => setActiveFilter(f)}
+              style={[styles.chip, activeYear === f && styles.chipActive]}
+              onPress={() => setActiveYear(f)}
             >
-              <Text style={[styles.chipText, activeFilter === f && styles.chipTextActive]}>{f}</Text>
+              <Text style={[styles.chipText, activeYear === f && styles.chipTextActive]}>{f}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -94,15 +118,31 @@ export default function CatalogoScreen() {
         <View style={styles.center}>
           <ActivityIndicator color={theme.colors.primary} size="large" />
         </View>
+      ) : error ? (
+        <View style={styles.center}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={refresh}>
+            <Text style={styles.retryText}>Tentar novamente</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <FlatList
-          data={filtered}
+          data={items}
           renderItem={renderItem}
           keyExtractor={item => String(item.id)}
           numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.grid}
           showsVerticalScrollIndicator={false}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={styles.footerLoader}>
+                <ActivityIndicator color={theme.colors.primary} />
+              </View>
+            ) : null
+          }
           ListEmptyComponent={
             <View style={styles.center}>
               <Text style={styles.emptyText}>Nenhuma figura encontrada</Text>
@@ -135,7 +175,7 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: '#fff' },
   chipText: { color: '#fff', fontWeight: '600', fontSize: 13 },
   chipTextActive: { color: theme.colors.primary },
-  grid: { padding: 12 },
+  grid: { padding: 12, paddingBottom: 40 },
   row: { justifyContent: 'space-between', marginBottom: 12 },
   card: {
     backgroundColor: '#fff', borderRadius: 16, width: '48%',
@@ -147,12 +187,22 @@ const styles = StyleSheet.create({
   imagePlaceholder: { alignItems: 'center', justifyContent: 'center' },
   imagePlaceholderText: { fontSize: 40 },
   rarityDot: { position: 'absolute', top: 8, right: 8, width: 10, height: 10, borderRadius: 5 },
-  cardInfo: { padding: 10 },
-  cardName: { fontSize: 13, fontWeight: '700', color: '#000', marginBottom: 6, lineHeight: 18 },
+  cardInfo: { padding: 10, gap: 4 },
+  cardName: { fontSize: 13, fontWeight: '700', color: '#000', lineHeight: 18 },
   cardBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   yearPill: { backgroundColor: theme.colors.primary, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
   yearText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   cardValue: { fontSize: 13, fontWeight: '700', color: '#000' },
+  addBtn: {
+    backgroundColor: theme.colors.primary, borderRadius: 8,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 4, paddingVertical: 6, marginTop: 4,
+  },
+  addBtnText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
   emptyText: { color: '#666', fontSize: 15 },
+  errorText: { color: '#e53e3e', fontSize: 14, textAlign: 'center', marginBottom: 12 },
+  retryBtn: { backgroundColor: theme.colors.primary, borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 },
+  retryText: { color: '#fff', fontWeight: '700' },
+  footerLoader: { padding: 20, alignItems: 'center' },
 });

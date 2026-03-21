@@ -1,39 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView,
+  StyleSheet, SafeAreaView, ActivityIndicator,
 } from 'react-native';
-import { TrendingUp, Package, Plus, BookOpen, Camera } from 'lucide-react-native';
+import { TrendingUp, Package, Plus, BookOpen, Camera, Bell } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
-import { getCollectionStats, getTopValorizadas } from '../../db/database';
+import { usePatrimonio } from '../../hooks/usePatrimonio';
+import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../hooks/useNotifications';
+import { useSubscription } from '../../hooks/useSubscription';
+
 
 const formatBRL = (v: number) =>
   `R$ ${(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [stats, setStats] = useState({ total_items: 0, total_paid: 0, total_market_value: 0 });
-  const [topItems, setTopItems] = useState<any[]>([]);
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
-    try {
-      const s = await getCollectionStats();
-      if (s) setStats(s);
-      const top = await getTopValorizadas(3);
-      setTopItems(top);
-    } catch (e) {
-      // DB pode estar vazio ainda
-    }
-  }
-
-  const appreciation = stats.total_paid > 0
-    ? Math.round((stats.total_market_value - stats.total_paid) / stats.total_paid * 100)
-    : 0;
+  const { totalMarket, totalPaid, itemCount, appreciation, topValorizadas, loading } = usePatrimonio(userId);
+  const { unreadCount } = useNotifications(userId);
+  const { plan } = useSubscription(userId);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -41,83 +30,107 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.logo}>🎖️ filecard</Text>
-          <Text style={styles.greeting}>Sua coleção, seu patrimônio</Text>
-        </View>
-
-        {/* Hero patrimônio */}
-        {stats.total_items > 0 && (
-          <View style={styles.heroCard}>
-            <Text style={styles.heroLabel}>SUA COLEÇÃO VALE</Text>
-            <Text style={styles.heroValue}>{formatBRL(stats.total_market_value)}</Text>
-            <View style={styles.heroStats}>
-              <View style={styles.heroStat}>
-                <Text style={styles.heroStatLabel}>INVESTIDO</Text>
-                <Text style={styles.heroStatValue}>{formatBRL(stats.total_paid)}</Text>
+          <View style={styles.headerRight}>
+            {plan === 'pro' || plan === 'lifetime' ? (
+              <View style={styles.proBadge}>
+                <Text style={styles.proBadgeText}>PRO</Text>
               </View>
-              <View style={styles.heroStat}>
-                <Text style={styles.heroStatLabel}>VALORIZAÇÃO</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                  <Text style={styles.heroStatValue}>+{appreciation}%</Text>
-                  <TrendingUp size={16} color="#fff" />
+            ) : null}
+            {unreadCount > 0 && (
+              <View style={styles.bellContainer}>
+                <Bell size={20} color="#fff" />
+                <View style={styles.bellBadge}>
+                  <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
                 </View>
               </View>
-              <View style={styles.heroStat}>
-                <Text style={styles.heroStatLabel}>FIGURAS</Text>
-                <Text style={styles.heroStatValue}>{stats.total_items}</Text>
-              </View>
-            </View>
+            )}
           </View>
-        )}
-
-        {/* Atalhos rápidos */}
-        <Text style={styles.sectionLabel}>AÇÕES RÁPIDAS</Text>
-        <View style={styles.shortcuts}>
-          <TouchableOpacity style={styles.shortcut} onPress={() => router.push('/(tabs)/scanner')}>
-            <Camera size={24} color={theme.colors.primary} />
-            <Text style={styles.shortcutText}>Escanear</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.shortcut} onPress={() => router.push('/(tabs)/catalogo')}>
-            <BookOpen size={24} color={theme.colors.primary} />
-            <Text style={styles.shortcutText}>Catálogo</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.shortcut} onPress={() => router.push('/(tabs)/colecao')}>
-            <Package size={24} color={theme.colors.primary} />
-            <Text style={styles.shortcutText}>Coleção</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.shortcut}>
-            <Plus size={24} color={theme.colors.primary} />
-            <Text style={styles.shortcutText}>Adicionar</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Top valorizadas */}
-        {topItems.length > 0 && (
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator color={theme.colors.primary} size="large" />
+          </View>
+        ) : (
           <>
-            <Text style={styles.sectionLabel}>TOP VALORIZADAS</Text>
-            <View style={styles.topList}>
-              {topItems.map((item, i) => (
-                <View key={i} style={styles.topItem}>
-                  <Text style={styles.topMedal}>{'🥇🥈🥉'[i]}</Text>
-                  <Text style={styles.topName}>{item.display_name}</Text>
-                  <View style={styles.appreciationPill}>
-                    <Text style={styles.appreciationText}>+{item.appreciation_pct}%</Text>
+            {/* Hero patrimônio */}
+            {itemCount > 0 && (
+              <View style={styles.heroCard}>
+                <Text style={styles.heroLabel}>SUA COLEÇÃO VALE</Text>
+                <Text style={styles.heroValue}>{formatBRL(totalMarket)}</Text>
+                <View style={styles.heroStats}>
+                  <View style={styles.heroStat}>
+                    <Text style={styles.heroStatLabel}>INVESTIDO</Text>
+                    <Text style={styles.heroStatValue}>{formatBRL(totalPaid)}</Text>
+                  </View>
+                  <View style={styles.heroStat}>
+                    <Text style={styles.heroStatLabel}>VALORIZAÇÃO</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <Text style={styles.heroStatValue}>{appreciation >= 0 ? '+' : ''}{appreciation}%</Text>
+                      <TrendingUp size={16} color="#fff" />
+                    </View>
+                  </View>
+                  <View style={styles.heroStat}>
+                    <Text style={styles.heroStatLabel}>FIGURAS</Text>
+                    <Text style={styles.heroStatValue}>{itemCount}</Text>
                   </View>
                 </View>
-              ))}
-            </View>
-          </>
-        )}
+              </View>
+            )}
 
-        {/* Empty state */}
-        {stats.total_items === 0 && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>🎖️</Text>
-            <Text style={styles.emptyTitle}>Comece sua coleção</Text>
-            <Text style={styles.emptySubtitle}>Escaneie uma figura ou busque no catálogo</Text>
-            <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push('/(tabs)/catalogo')}>
-              <Text style={styles.emptyBtnText}>Ver Catálogo</Text>
-            </TouchableOpacity>
-          </View>
+            {/* Atalhos rápidos */}
+            <Text style={styles.sectionLabel}>AÇÕES RÁPIDAS</Text>
+            <View style={styles.shortcuts}>
+              <TouchableOpacity style={styles.shortcut} onPress={() => router.push('/(tabs)/scanner')}>
+                <Camera size={24} color={theme.colors.primary} />
+                <Text style={styles.shortcutText}>Escanear</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.shortcut} onPress={() => router.push('/(tabs)/catalogo')}>
+                <BookOpen size={24} color={theme.colors.primary} />
+                <Text style={styles.shortcutText}>Catálogo</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.shortcut} onPress={() => router.push('/(tabs)/colecao')}>
+                <Package size={24} color={theme.colors.primary} />
+                <Text style={styles.shortcutText}>Coleção</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.shortcut} onPress={() => router.push('/(tabs)/scanner')}>
+                <Plus size={24} color={theme.colors.primary} />
+                <Text style={styles.shortcutText}>Adicionar</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Top valorizadas */}
+            {topValorizadas.length > 0 && (
+              <>
+                <Text style={styles.sectionLabel}>TOP VALORIZADAS</Text>
+                <View style={styles.topList}>
+                  {topValorizadas.map((item, i) => (
+                    <View key={item.id} style={styles.topItem}>
+                      <Text style={styles.topMedal}>{'🥇🥈🥉🏅🏅'[i]}</Text>
+                      <Text style={styles.topName} numberOfLines={1}>
+                        {item.catalog_item?.display_name ?? 'Figura'}
+                      </Text>
+                      <View style={styles.appreciationPill}>
+                        <Text style={styles.appreciationText}>+{item.appreciation_pct}%</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
+
+            {/* Empty state */}
+            {itemCount === 0 && (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyEmoji}>🎖️</Text>
+                <Text style={styles.emptyTitle}>Comece sua coleção</Text>
+                <Text style={styles.emptySubtitle}>Escaneie uma figura ou busque no catálogo</Text>
+                <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push('/(tabs)/catalogo')}>
+                  <Text style={styles.emptyBtnText}>Ver Catálogo</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </>
         )}
 
         <View style={{ height: 20 }} />
@@ -131,9 +144,23 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: theme.colors.primary,
     paddingHorizontal: 16, paddingTop: 8, paddingBottom: 20,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
   },
-  logo: { color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 4 },
-  greeting: { color: 'rgba(255,255,255,0.8)', fontSize: 14 },
+  logo: { color: '#fff', fontSize: 20, fontWeight: '800' },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  proBadge: {
+    backgroundColor: 'rgba(255,255,255,0.25)', borderRadius: 8,
+    paddingHorizontal: 8, paddingVertical: 3,
+  },
+  proBadgeText: { color: '#fff', fontSize: 11, fontWeight: '800', letterSpacing: 1 },
+  bellContainer: { position: 'relative' },
+  bellBadge: {
+    position: 'absolute', top: -6, right: -6,
+    backgroundColor: '#FF4444', borderRadius: 8, minWidth: 16, height: 16,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3,
+  },
+  bellBadgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
+  loadingContainer: { padding: 60, alignItems: 'center' },
   heroCard: {
     backgroundColor: theme.colors.primary, margin: 16, borderRadius: 20, padding: 24,
     shadowColor: theme.colors.primary, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,

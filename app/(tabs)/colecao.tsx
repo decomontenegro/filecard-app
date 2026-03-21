@@ -1,57 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Image,
   StyleSheet, SafeAreaView, ActivityIndicator,
 } from 'react-native';
-import { Plus, Award, ChevronRight } from 'lucide-react-native';
+import { Plus, Award, ChevronRight, RefreshCw } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
-import { getCollectionItems, getCollectionStats } from '../../db/database';
+import { useCollection } from '../../hooks/useCollection';
+import { useAuth } from '../../context/AuthContext';
+
 
 const formatBRL = (v: number) => `R$ ${(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
-const getAppreciation = (paid: number, market: number) => {
-  if (!paid || paid === 0) return null;
+
+const getAppreciation = (paid: number | undefined, market: number | undefined) => {
+  if (!paid || paid === 0 || !market) return null;
   const pct = ((market - paid) / paid) * 100;
   return pct > 0 ? `+${pct.toFixed(0)}%` : `${pct.toFixed(0)}%`;
 };
 
-// Mock items para demo (até ter itens reais na coleção)
-const MOCK_ITEMS = [
-  { id: 1, display_name: 'Snake Eyes v1', year: 1982, condition_grade: 'C8', price_paid: 240, market_value_brl: 850, image_url: 'https://images.unsplash.com/photo-1624308188733-abcf5b36a039?w=200' },
-  { id: 2, display_name: 'Duke', year: 1984, condition_grade: 'C8', price_paid: 200, market_value_brl: 635, image_url: 'https://images.unsplash.com/photo-1771947010805-24a64499c357?w=200' },
-  { id: 3, display_name: 'Cobra Commander', year: 1982, condition_grade: 'C9', price_paid: 300, market_value_brl: 720, image_url: null },
-  { id: 4, display_name: 'Zartan', year: 1984, condition_grade: 'C7', price_paid: 200, market_value_brl: 420, image_url: null },
-  { id: 5, display_name: 'Scarlett', year: 1982, condition_grade: 'C8', price_paid: 180, market_value_brl: 590, image_url: 'https://images.unsplash.com/photo-1768969831359-c2e53759876f?w=200' },
-];
+const CONDITION_COLORS: Record<string, string> = {
+  C10: '#4CAF50', C9: '#8BC34A', C8: '#CDDC39',
+  C7: '#FFC107', C6: '#FF9800', C5: '#FF5722',
+};
 
 export default function ColecaoScreen() {
-  const [items, setItems] = useState<any[]>([]);
-  const [stats, setStats] = useState({ total_items: 0, total_paid: 0, total_market_value: 0 });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => { loadData(); }, []);
-
-  async function loadData() {
-    setLoading(true);
-    try {
-      const dbItems = await getCollectionItems();
-      setItems(dbItems.length > 0 ? dbItems : MOCK_ITEMS);
-      const s = await getCollectionStats();
-      if (s && s.total_items > 0) {
-        setStats(s);
-      } else {
-        const totalPaid = MOCK_ITEMS.reduce((a, i) => a + i.price_paid, 0);
-        const totalMarket = MOCK_ITEMS.reduce((a, i) => a + i.market_value_brl, 0);
-        setStats({ total_items: MOCK_ITEMS.length, total_paid: totalPaid, total_market_value: totalMarket });
-      }
-    } catch (e) {
-      setItems(MOCK_ITEMS);
-    }
-    setLoading(false);
-  }
-
-  const appreciation = stats.total_paid > 0
-    ? Math.round((stats.total_market_value - stats.total_paid) / stats.total_paid * 100)
-    : 0;
+  const router = useRouter();
+  const { user } = useAuth();
+  const { items, stats, loading, error, remove, refresh } = useCollection(user?.id ?? null);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -60,9 +35,12 @@ export default function ColecaoScreen() {
         <View style={styles.titleRow}>
           <View>
             <Text style={styles.title}>Minha Coleção</Text>
-            <Text style={styles.subtitle}>{stats.total_items} figuras • +{appreciation}% valorização</Text>
+            <Text style={styles.subtitle}>
+              {stats.totalItems} figuras
+              {stats.appreciation !== 0 && ` • ${stats.appreciation >= 0 ? '+' : ''}${stats.appreciation}%`}
+            </Text>
           </View>
-          <TouchableOpacity style={styles.fab}>
+          <TouchableOpacity style={styles.fab} onPress={() => router.push('/(tabs)/scanner')}>
             <Plus size={24} color="#fff" strokeWidth={3} />
           </TouchableOpacity>
         </View>
@@ -72,15 +50,53 @@ export default function ColecaoScreen() {
         <View style={styles.center}>
           <ActivityIndicator color={theme.colors.primary} size="large" />
         </View>
+      ) : error ? (
+        <View style={styles.center}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={refresh}>
+            <RefreshCw size={16} color="#fff" />
+            <Text style={styles.retryText}>Tentar novamente</Text>
+          </TouchableOpacity>
+        </View>
+      ) : items.length === 0 ? (
+        <View style={styles.center}>
+          <Text style={styles.emptyEmoji}>📦</Text>
+          <Text style={styles.emptyTitle}>Coleção vazia</Text>
+          <Text style={styles.emptySubtitle}>Adicione figuras pelo catálogo ou escaneie uma</Text>
+          <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push('/(tabs)/catalogo')}>
+            <Text style={styles.emptyBtnText}>Ver Catálogo</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-          {items.map((item, index) => {
-            const app = getAppreciation(item.price_paid, item.market_value_brl ?? item.market_value_brl);
+          {/* Resumo financeiro */}
+          <View style={styles.summaryCard}>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>INVESTIDO</Text>
+              <Text style={styles.summaryValue}>{formatBRL(stats.totalPaid)}</Text>
+            </View>
+            <View style={styles.summarySep} />
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>VALOR ATUAL</Text>
+              <Text style={styles.summaryValue}>{formatBRL(stats.totalMarket)}</Text>
+            </View>
+            <View style={styles.summarySep} />
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>GANHO</Text>
+              <Text style={[styles.summaryValue, { color: stats.appreciation >= 0 ? '#4CAF50' : '#e53e3e' }]}>
+                {stats.appreciation >= 0 ? '+' : ''}{formatBRL(stats.totalMarket - stats.totalPaid)}
+              </Text>
+            </View>
+          </View>
+
+          {items.map((item) => {
+            const app = getAppreciation(item.price_paid, item.market_value);
+            const conditionColor = CONDITION_COLORS[item.condition_grade ?? ''] ?? theme.colors.primary;
             return (
               <TouchableOpacity key={item.id} style={styles.itemCard} activeOpacity={0.85}>
                 <View style={styles.thumbContainer}>
-                  {item.image_url ? (
-                    <Image source={{ uri: item.image_url }} style={styles.thumb} resizeMode="cover" />
+                  {item.primary_photo_url ? (
+                    <Image source={{ uri: item.primary_photo_url }} style={styles.thumb} resizeMode="cover" />
                   ) : (
                     <View style={[styles.thumb, styles.thumbPlaceholder]}>
                       <Text style={styles.thumbEmoji}>🎖️</Text>
@@ -89,21 +105,26 @@ export default function ColecaoScreen() {
                 </View>
                 <View style={styles.itemInfo}>
                   <View style={styles.itemTop}>
-                    <Text style={styles.itemName} numberOfLines={1}>{item.display_name}</Text>
-                    <View style={styles.conditionBadge}>
+                    <Text style={styles.itemName} numberOfLines={1}>
+                      {item.catalog_item?.display_name ?? 'Figura'}
+                    </Text>
+                    <View style={[styles.conditionBadge, { backgroundColor: conditionColor }]}>
                       <Award size={10} color="#fff" />
-                      <Text style={styles.conditionText}>{item.condition_grade}</Text>
+                      <Text style={styles.conditionText}>{item.condition_grade ?? '—'}</Text>
                     </View>
                   </View>
-                  <Text style={styles.itemYear}>{item.year}</Text>
+                  <Text style={styles.itemYear}>{item.catalog_item?.year ?? ''}</Text>
                   <View style={styles.itemBottom}>
                     <Text style={styles.priceText}>
-                      {formatBRL(item.price_paid)}
+                      {formatBRL(item.price_paid ?? 0)}
                       <Text style={styles.arrow}> → </Text>
-                      <Text style={styles.priceMarket}>{formatBRL(item.market_value_brl)}</Text>
+                      <Text style={styles.priceMarket}>{formatBRL(item.market_value ?? 0)}</Text>
                     </Text>
                     {app && (
-                      <View style={styles.appreciationPill}>
+                      <View style={[
+                        styles.appreciationPill,
+                        { backgroundColor: app.startsWith('+') ? theme.colors.appreciation : '#FF5722' }
+                      ]}>
                         <Text style={styles.appreciationText}>{app}</Text>
                       </View>
                     )}
@@ -122,7 +143,7 @@ export default function ColecaoScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.colors.background },
-  header: { backgroundColor: theme.colors.primaryLight, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 },
+  header: { backgroundColor: theme.colors.primaryLight ?? theme.colors.primary, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 },
   logo: { color: '#fff', fontSize: 16, fontWeight: '800', marginBottom: 10 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   title: { color: '#fff', fontSize: 22, fontWeight: '700' },
@@ -132,6 +153,15 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     shadowColor: theme.colors.primary, shadowOpacity: 0.4, shadowRadius: 8, elevation: 4,
   },
+  summaryCard: {
+    backgroundColor: '#fff', margin: 12, borderRadius: 16, padding: 16,
+    flexDirection: 'row', alignItems: 'center',
+    shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+  },
+  summaryItem: { flex: 1, alignItems: 'center' },
+  summaryLabel: { color: '#888', fontSize: 10, fontWeight: '600', letterSpacing: 0.5, marginBottom: 4 },
+  summaryValue: { color: '#000', fontSize: 14, fontWeight: '700' },
+  summarySep: { width: 1, height: 32, backgroundColor: '#f0f0f0', marginHorizontal: 8 },
   list: { padding: 12, gap: 10 },
   itemCard: {
     backgroundColor: '#fff', borderRadius: 16, flexDirection: 'row',
@@ -146,8 +176,8 @@ const styles = StyleSheet.create({
   itemTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   itemName: { fontSize: 14, fontWeight: '700', color: '#000', flex: 1 },
   conditionBadge: {
-    backgroundColor: theme.colors.primary, borderRadius: 8,
-    paddingHorizontal: 7, paddingVertical: 3, flexDirection: 'row', alignItems: 'center', gap: 3,
+    borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3,
+    flexDirection: 'row', alignItems: 'center', gap: 3,
   },
   conditionText: { color: '#fff', fontSize: 10, fontWeight: '700' },
   itemYear: { color: '#666', fontSize: 12, marginTop: 3 },
@@ -155,7 +185,19 @@ const styles = StyleSheet.create({
   priceText: { fontSize: 12, color: '#888' },
   arrow: { color: '#bbb' },
   priceMarket: { fontWeight: '700', color: '#000' },
-  appreciationPill: { backgroundColor: theme.colors.appreciation, borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3 },
+  appreciationPill: { borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3 },
   appreciationText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
+  emptyEmoji: { fontSize: 48, marginBottom: 16 },
+  emptyTitle: { fontSize: 20, fontWeight: '700', color: '#000', marginBottom: 8 },
+  emptySubtitle: { fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 24 },
+  emptyBtn: { backgroundColor: theme.colors.primary, borderRadius: 14, paddingHorizontal: 24, paddingVertical: 14 },
+  emptyBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  errorText: { color: '#e53e3e', fontSize: 14, textAlign: 'center', marginBottom: 12 },
+  retryBtn: {
+    backgroundColor: theme.colors.primary, borderRadius: 10,
+    paddingHorizontal: 20, paddingVertical: 10,
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+  },
+  retryText: { color: '#fff', fontWeight: '700' },
 });
