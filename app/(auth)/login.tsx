@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { router } from 'expo-router';
+import { Package } from 'lucide-react-native';
 import { useAuth } from '@/context/AuthContext';
 import { theme } from '@/constants/theme';
 
@@ -42,7 +43,9 @@ export default function LoginScreen() {
       <View style={styles.inner}>
         {/* Logo / Header */}
         <View style={styles.header}>
-          <Text style={styles.logo}>📦</Text>
+          <View style={styles.logoIcon}>
+            <Package size={48} color={theme.colors.primary} strokeWidth={1.5} />
+          </View>
           <Text style={styles.title}>filecard</Text>
           <Text style={styles.subtitle}>Sua coleção é um patrimônio.</Text>
         </View>
@@ -108,9 +111,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 48,
   },
-  logo: {
-    fontSize: 56,
-    marginBottom: 8,
+  logoIcon: {
+    marginBottom: 12,
   },
   title: {
     fontSize: 32,

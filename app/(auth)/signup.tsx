@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { router } from 'expo-router';
+import { Package } from 'lucide-react-native';
 import { useAuth } from '@/context/AuthContext';
 import { theme } from '@/constants/theme';
 
@@ -57,7 +58,9 @@ export default function SignupScreen() {
     >
       <View style={styles.inner}>
         <View style={styles.header}>
-          <Text style={styles.logo}>📦</Text>
+          <View style={styles.logoIcon}>
+            <Package size={48} color={theme.colors.primary} strokeWidth={1.5} />
+          </View>
           <Text style={styles.title}>Criar conta</Text>
           <Text style={styles.subtitle}>Comece a catalogar sua coleção</Text>
         </View>
@@ -130,9 +133,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 48,
   },
-  logo: {
-    fontSize: 56,
-    marginBottom: 8,
+  logoIcon: {
+    marginBottom: 12,
   },
   title: {
     fontSize: 32,
