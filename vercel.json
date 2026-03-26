@@ -7,5 +7,19 @@
       "EXPO_PUBLIC_SUPABASE_URL": "https://tfaxxthjniwnyzuzxloh.supabase.co",
       "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmYXh4dGhqbml3bnl6dXp4bG9oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTk5MDEsImV4cCI6MjA4ODg5NTkwMX0.2tIGaIYJKUXo4VD_s0SQlq3BuP4QBT9AaZ3vKC5SveM"
     }
-  }
+  },
+  "routes": [
+    {
+      "src": "/_expo/(.*)",
+      "dest": "/_expo/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
