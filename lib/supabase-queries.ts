@@ -502,3 +502,4 @@ export async function updateSyncCheckpoint(
 
   if (error) throw error;
 }
+// schema alignment fixes: franchise_id, photo_url, user_collection_items 1774784088
