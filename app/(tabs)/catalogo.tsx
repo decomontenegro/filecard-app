@@ -4,6 +4,7 @@ import {
   FlatList, Image, StyleSheet, SafeAreaView, ActivityIndicator,
   ScrollView,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Search, Plus } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
 import { useCatalog } from '../../hooks/useCatalog';
@@ -20,6 +21,7 @@ const formatBRL = (v: number) =>
 
 export default function CatalogoScreen() {
   const { user } = useAuth();
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [activeYear, setActiveYear] = useState('Todos');
   const [addingId, setAddingId] = useState<string | null>(null);
@@ -46,7 +48,11 @@ export default function CatalogoScreen() {
   }, [user, addToCollection]);
 
   const renderItem = ({ item }: { item: CatalogItem & { market_value_brl?: number } }) => (
-    <TouchableOpacity style={styles.card} activeOpacity={0.85}>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.85}
+      onPress={() => router.push(`/catalogo/${item.id}`)}
+    >
       <View style={styles.imageContainer}>
         {item.image_url ? (
           <Image source={{ uri: item.image_url }} style={styles.image} resizeMode="contain" />
