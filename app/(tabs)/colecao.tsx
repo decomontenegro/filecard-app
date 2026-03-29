@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Image,
-  StyleSheet, SafeAreaView, ActivityIndicator,
+  StyleSheet, SafeAreaView, ActivityIndicator, Alert,
 } from 'react-native';
-import { Plus, Award, ChevronRight, RefreshCw } from 'lucide-react-native';
+import { Plus, Award, ChevronRight, RefreshCw, Trash2 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
 import { useCollection } from '../../hooks/useCollection';
@@ -92,6 +92,16 @@ export default function ColecaoScreen() {
           {items.map((item) => {
             const app = getAppreciation(item.price_paid, item.market_value);
             const conditionColor = CONDITION_COLORS[item.condition_grade ?? ''] ?? theme.colors.primary;
+            const handleRemove = () => {
+              Alert.alert(
+                'Remover figura',
+                `Remover ${item.catalog_item?.display_name ?? 'esta figura'} da coleção?`,
+                [
+                  { text: 'Cancelar', style: 'cancel' },
+                  { text: 'Remover', style: 'destructive', onPress: () => remove(item.id) },
+                ]
+              );
+            };
             return (
               <TouchableOpacity key={item.id} style={styles.itemCard} activeOpacity={0.85}>
                 <View style={styles.thumbContainer}>
@@ -130,7 +140,9 @@ export default function ColecaoScreen() {
                     )}
                   </View>
                 </View>
-                <ChevronRight size={16} color="#ccc" />
+                <TouchableOpacity onPress={handleRemove} style={styles.removeBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                  <Trash2 size={16} color="#ccc" />
+                </TouchableOpacity>
               </TouchableOpacity>
             );
           })}
@@ -200,4 +212,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 8,
   },
   retryText: { color: '#fff', fontWeight: '700' },
+  removeBtn: { padding: 4 },
 });
