@@ -6,7 +6,7 @@ export interface CatalogItem {
   id: string;
   display_name: string;
   year: number;
-  franchise_id?: string;
+  product_line_id?: number;
   rarity_level?: number;
   image_url?: string;
   description?: string;
@@ -108,10 +108,9 @@ export async function getCatalogItems(filters?: {
   let query = supabase
     .from('catalog_items')
     .select(`
-      id, display_name, year, franchise_id, rarity_level, image_url, description,
+      id, display_name, year, product_line_id, rarity_level, image_url, description,
       market_prices ( price_brl, condition_grade, source, fetched_at )
     `)
-    .is('deleted_at', null)
     .range(from, to)
     .order('display_name');
 
@@ -122,7 +121,7 @@ export async function getCatalogItems(filters?: {
     query = query.eq('year', filters.year);
   }
   if (filters?.franchise) {
-    query = query.eq('franchise_id', filters.franchise);
+    query = query.eq('product_line_id', filters.franchise);
   }
 
   const { data, error } = await query;
@@ -166,7 +165,7 @@ export async function getCollectionItems(userId: string): Promise<CollectionItem
     .select(`
       id, user_id, catalog_item_id, condition_grade, price_paid, acquired_at, notes, version, deleted_at,
       catalog_item:catalog_items (
-        id, display_name, year, franchise_id, rarity_level, image_url,
+        id, display_name, year, product_line_id, rarity_level, image_url,
         market_prices ( price_brl, source, fetched_at )
       ),
       item_photos ( photo_url, is_primary, photo_type )
