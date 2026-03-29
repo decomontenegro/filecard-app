@@ -159,7 +159,7 @@ export default function CatalogoItemScreen() {
             {item.item_variants.map((v: any) => (
               <View key={v.id} style={styles.variantRow}>
                 <Package size={14} color={theme.colors.primary} />
-                <Text style={styles.variantText}>{v.name}</Text>
+                <Text style={styles.variantText}>{v.variant_name}{v.variant_type ? ` (${v.variant_type})` : ''}</Text>
               </View>
             ))}
           </View>

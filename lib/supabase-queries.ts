@@ -150,7 +150,7 @@ export async function getCatalogItemById(id: string) {
       *,
       market_prices ( price_brl, price_usd, source, condition_grade, fetched_at ),
       item_photos ( storage_path, bucket_name, is_primary, photo_type ),
-      item_variants ( id, name, description )
+      item_variants ( id, variant_name, variant_type, notes )
     `)
     .eq('id', id)
     .single();
