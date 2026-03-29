@@ -20,7 +20,7 @@ import { useCollection } from '../../hooks/useCollection';
 interface Accessory {
   id: string;
   name: string;
-  category: 'weapon' | 'gear' | 'vehicle_part' | 'file_card' | 'other';
+  accessory_type: 'weapon' | 'gear' | 'vehicle_part' | 'file_card' | 'other';
   required_for_complete: boolean;
   display_order: number;
 }
@@ -301,7 +301,7 @@ function AddToCollectionModal({
                       {checkedAccessories.has(acc.id) && <Check size={12} color="#fff" />}
                     </View>
                     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      {CATEGORY_ICONS[acc.category] ?? CATEGORY_ICONS.other}
+                      {CATEGORY_ICONS[acc.accessory_type] ?? CATEGORY_ICONS.other}
                       <Text style={modal.accName}>{acc.name}</Text>
                       {acc.required_for_complete && (
                         <View style={modal.requiredBadge}>
@@ -450,7 +450,7 @@ export default function CatalogoItemScreen() {
     try {
       const [accRes, varRes] = await Promise.all([
         fetch(
-          `${SUPABASE_URL}/rest/v1/accessories?catalog_item_id=eq.${catalogId}&select=id,name,category,required_for_complete,display_order&order=display_order`,
+          `${SUPABASE_URL}/rest/v1/accessories?catalog_item_id=eq.${catalogId}&select=id,name,accessory_type,required_for_complete,display_order&order=display_order`,
           { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
         ),
         fetch(
@@ -604,7 +604,7 @@ export default function CatalogoItemScreen() {
             {accessories.map((acc) => (
               <View key={acc.id} style={styles.accRow}>
                 <View style={styles.accIconWrap}>
-                  {CATEGORY_ICONS[acc.category] ?? CATEGORY_ICONS.other}
+                  {CATEGORY_ICONS[acc.accessory_type] ?? CATEGORY_ICONS.other}
                 </View>
                 <Text style={styles.accName}>{acc.name}</Text>
                 {acc.required_for_complete && (
