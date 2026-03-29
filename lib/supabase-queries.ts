@@ -19,6 +19,7 @@ export interface CollectionItem {
   user_id: string;
   catalog_item_id: string;
   condition_grade?: string;
+  completeness_status?: 'complete' | 'incomplete' | 'stripped' | null;
   price_paid?: number;
   acquired_at?: string;
   notes?: string;
@@ -166,7 +167,7 @@ export async function getCollectionItems(userId: string): Promise<CollectionItem
   const { data, error } = await supabase
     .from('user_collection_items')
     .select(`
-      id, catalog_item_id, condition_grade, price_paid, acquisition_date, private_notes, photo_url, deleted_at,
+      id, catalog_item_id, condition_grade, completeness_status, price_paid, acquisition_date, private_notes, photo_url, deleted_at,
       user_collection:user_collections ( user_id ),
       catalog_item:catalog_items (
         id, display_name, year, product_line_id, rarity_level, image_url,

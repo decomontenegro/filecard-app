@@ -3,7 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, Image,
   StyleSheet, SafeAreaView, ActivityIndicator, Alert,
 } from 'react-native';
-import { Plus, Award, ChevronRight, RefreshCw, Trash2 } from 'lucide-react-native';
+import { Plus, Award, RefreshCw, Trash2, CheckCircle, AlertCircle, Circle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
 import { useCollection } from '../../hooks/useCollection';
@@ -123,7 +123,34 @@ export default function ColecaoScreen() {
                       <Text style={styles.conditionText}>{item.condition_grade ?? '—'}</Text>
                     </View>
                   </View>
-                  <Text style={styles.itemYear}>{item.catalog_item?.year ?? ''}</Text>
+                  <View style={styles.yearRow}>
+                    <Text style={styles.itemYear}>{item.catalog_item?.year ?? ''}</Text>
+                    {item.completeness_status && (
+                      <View style={[
+                        styles.completenessBadge,
+                        item.completeness_status === 'complete'
+                          ? styles.completeBadge
+                          : item.completeness_status === 'incomplete'
+                          ? styles.incompleteBadge
+                          : styles.strippedBadge,
+                      ]}>
+                        {item.completeness_status === 'complete' ? (
+                          <CheckCircle size={10} color="#fff" />
+                        ) : item.completeness_status === 'incomplete' ? (
+                          <AlertCircle size={10} color="#fff" />
+                        ) : (
+                          <Circle size={10} color="#fff" />
+                        )}
+                        <Text style={styles.completenessText}>
+                          {item.completeness_status === 'complete'
+                            ? 'Completo'
+                            : item.completeness_status === 'incomplete'
+                            ? 'Incompleto'
+                            : 'Sem acess.'}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                   <View style={styles.itemBottom}>
                     <Text style={styles.priceText}>
                       {formatBRL(item.price_paid ?? 0)}
@@ -192,7 +219,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 3,
   },
   conditionText: { color: '#fff', fontSize: 10, fontWeight: '700' },
-  itemYear: { color: '#666', fontSize: 12, marginTop: 3 },
+  itemYear: { color: '#666', fontSize: 12 },
+  yearRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 3 },
+  completenessBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    borderRadius: 10, paddingHorizontal: 7, paddingVertical: 2,
+  },
+  completeBadge: { backgroundColor: '#4CAF50' },
+  incompleteBadge: { backgroundColor: '#FF9800' },
+  strippedBadge: { backgroundColor: '#9E9E9E' },
+  completenessText: { color: '#fff', fontSize: 10, fontWeight: '700' },
   itemBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 },
   priceText: { fontSize: 12, color: '#888' },
   arrow: { color: '#bbb' },
