@@ -58,7 +58,7 @@ export default function CatalogoScreen() {
           <Image source={{ uri: item.image_url }} style={styles.image} resizeMode="contain" />
         ) : (
           <View style={[styles.image, styles.imagePlaceholder]}>
-            <Text style={styles.imagePlaceholderText}>🎖️</Text>
+            <Text style={styles.imagePlaceholderText}>?</Text>
           </View>
         )}
         {item.rarity_level && item.rarity_level > 0 && (
@@ -96,7 +96,7 @@ export default function CatalogoScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Text style={styles.logo}>🎖️ filecard</Text>
+        <Text style={styles.logo}>filecard</Text>
         <View style={styles.searchBar}>
           <Search size={16} color="#999" />
           <TextInput

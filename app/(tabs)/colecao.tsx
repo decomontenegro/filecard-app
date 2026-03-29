@@ -31,7 +31,7 @@ export default function ColecaoScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Text style={styles.logo}>🎖️ filecard</Text>
+        <Text style={styles.logo}>filecard</Text>
         <View style={styles.titleRow}>
           <View>
             <Text style={styles.title}>Minha Coleção</Text>
@@ -60,7 +60,7 @@ export default function ColecaoScreen() {
         </View>
       ) : items.length === 0 ? (
         <View style={styles.center}>
-          <Text style={styles.emptyEmoji}>📦</Text>
+          <Text style={styles.emptyEmoji}>—</Text>
           <Text style={styles.emptyTitle}>Coleção vazia</Text>
           <Text style={styles.emptySubtitle}>Adicione figuras pelo catálogo ou escaneie uma</Text>
           <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push('/(tabs)/catalogo')}>
@@ -99,7 +99,7 @@ export default function ColecaoScreen() {
                     <Image source={{ uri: item.primary_photo_url }} style={styles.thumb} resizeMode="cover" />
                   ) : (
                     <View style={[styles.thumb, styles.thumbPlaceholder]}>
-                      <Text style={styles.thumbEmoji}>🎖️</Text>
+                      <Text style={styles.thumbEmoji}>?</Text>
                     </View>
                   )}
                 </View>

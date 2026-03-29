@@ -14,8 +14,8 @@ const formatBRL = (v: number) => `R$ ${(v || 0).toLocaleString('pt-BR', { minimu
 
 const PLAN_LABELS: Record<string, string> = {
   free: 'Free',
-  pro: 'Pro 🚀',
-  lifetime: 'Lifetime ♾️',
+  pro: 'Pro',
+  lifetime: 'Lifetime',
 };
 
 const PLAN_COLORS: Record<string, string> = {
@@ -53,7 +53,7 @@ export default function PerfilScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Text style={styles.logo}>🎖️ filecard</Text>
+        <Text style={styles.logo}>filecard</Text>
         <TouchableOpacity style={styles.settingsBtn}>
           <Settings size={20} color="#fff" />
         </TouchableOpacity>
@@ -69,7 +69,7 @@ export default function PerfilScreen() {
             {/* Avatar e nome */}
             <View style={styles.profileSection}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>🎖️</Text>
+                <Text style={styles.avatarText}>FC</Text>
               </View>
               <Text style={styles.name}>{displayName}</Text>
               <Text style={styles.handle}>{handle}</Text>
@@ -118,7 +118,7 @@ export default function PerfilScreen() {
                     <Text style={styles.subscriptionPlan}>{PLAN_LABELS[plan]}</Text>
                     {subscription.ends_at && (
                       <Text style={styles.subscriptionExpiry}>
-                        {plan === 'lifetime' ? 'Para sempre ♾️' : `Renova em ${new Date(subscription.ends_at).toLocaleDateString('pt-BR')}`}
+                        {plan === 'lifetime' ? 'Para sempre' : `Renova em ${new Date(subscription.ends_at).toLocaleDateString('pt-BR')}`}
                       </Text>
                     )}
                   </View>

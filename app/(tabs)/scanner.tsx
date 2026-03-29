@@ -94,7 +94,7 @@ export default function ScannerScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Text style={styles.logo}>🎖️ filecard</Text>
+        <Text style={styles.logo}>filecard</Text>
         <Text style={styles.title}>Scanner</Text>
       </View>
 
@@ -115,7 +115,7 @@ export default function ScannerScreen() {
               <Text style={styles.btnSecondaryText}>Galeria</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.tipText}>💡 Dica: foto com fundo neutro e boa iluminação dá resultados melhores</Text>
+          <Text style={styles.tipText}>Dica: foto com fundo neutro e boa iluminação dá resultados melhores</Text>
         </View>
       )}
 
@@ -146,7 +146,7 @@ export default function ScannerScreen() {
               onPress={() => setSelectedCandidate(item)}
             >
               <View style={styles.candidateRank}>
-                <Text style={styles.candidateRankText}>{'🥇🥈🥉'[i]}</Text>
+                <Text style={styles.candidateRankText}>{['1','2','3'][i]}</Text>
               </View>
               <View style={styles.candidateInfo}>
                 <Text style={styles.candidateName}>{item.display_name}</Text>
@@ -194,7 +194,7 @@ export default function ScannerScreen() {
 
       {scanState === 'confirmed' && (
         <View style={styles.confirmedContainer}>
-          <Text style={styles.confirmedEmoji}>✅</Text>
+          <Text style={styles.confirmedEmoji}>OK</Text>
           <Text style={styles.confirmedTitle}>Adicionado!</Text>
           <Text style={styles.confirmedSubtitle}>
             {selectedCandidate?.display_name} foi adicionado à sua coleção

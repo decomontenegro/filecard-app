@@ -48,7 +48,7 @@ export default function CatalogoItemScreen() {
     setAdding(true);
     try {
       await addToCollection(id!, condition);
-      Alert.alert('✅ Adicionado', `${item?.display_name} adicionado à sua coleção!`);
+      Alert.alert('Adicionado', `${item?.display_name} adicionado à sua coleção!`);
     } catch {
       Alert.alert('Erro', 'Não foi possível adicionar. Tente novamente.');
     } finally {
@@ -107,7 +107,7 @@ export default function CatalogoItemScreen() {
             <Image source={{ uri: photoUrl }} style={styles.image} resizeMode="contain" />
           ) : (
             <View style={[styles.image, styles.imagePlaceholder]}>
-              <Text style={styles.imagePlaceholderText}>🎖️</Text>
+              <Text style={styles.imagePlaceholderText}>?</Text>
             </View>
           )}
         </View>
@@ -135,7 +135,7 @@ export default function CatalogoItemScreen() {
         {/* Market prices */}
         {prices.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>💰 Preços de Mercado</Text>
+            <Text style={styles.sectionTitle}>Preços de Mercado</Text>
             <View style={styles.priceGrid}>
               {prices.slice(0, 6).map((p: any) => (
                 <View key={p.condition_grade} style={styles.priceCard}>
@@ -155,7 +155,7 @@ export default function CatalogoItemScreen() {
         {/* Variants */}
         {item.item_variants?.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🔄 Variantes</Text>
+            <Text style={styles.sectionTitle}>Variantes</Text>
             {item.item_variants.map((v: any) => (
               <View key={v.id} style={styles.variantRow}>
                 <Package size={14} color={theme.colors.primary} />
@@ -168,7 +168,7 @@ export default function CatalogoItemScreen() {
         {/* Add to collection */}
         {user && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📦 Adicionar à Coleção</Text>
+            <Text style={styles.sectionTitle}>Adicionar à Coleção</Text>
             <View style={styles.conditionGrid}>
               {Object.entries(CONDITION_LABELS).map(([grade, label]) => (
                 <TouchableOpacity

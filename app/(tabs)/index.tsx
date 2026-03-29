@@ -29,7 +29,7 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.logo}>🎖️ filecard</Text>
+          <Text style={styles.logo}>filecard</Text>
           <View style={styles.headerRight}>
             {plan === 'pro' || plan === 'lifetime' ? (
               <View style={styles.proBadge}>
@@ -106,7 +106,7 @@ export default function HomeScreen() {
                 <View style={styles.topList}>
                   {topValorizadas.map((item, i) => (
                     <View key={item.id} style={styles.topItem}>
-                      <Text style={styles.topMedal}>{'🥇🥈🥉🏅🏅'[i]}</Text>
+                      <Text style={styles.topMedal}>{['1','2','3','4','5'][i]}</Text>
                       <Text style={styles.topName} numberOfLines={1}>
                         {item.catalog_item?.display_name ?? 'Figura'}
                       </Text>
@@ -122,7 +122,7 @@ export default function HomeScreen() {
             {/* Empty state */}
             {itemCount === 0 && (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyEmoji}>🎖️</Text>
+                <Text style={styles.emptyEmoji}>*</Text>
                 <Text style={styles.emptyTitle}>Comece sua coleção</Text>
                 <Text style={styles.emptySubtitle}>Escaneie uma figura ou busque no catálogo</Text>
                 <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push('/(tabs)/catalogo')}>
