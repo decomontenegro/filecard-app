@@ -179,10 +179,10 @@ const styles = StyleSheet.create({
   row: { justifyContent: 'space-between', marginBottom: 12 },
   card: {
     backgroundColor: '#fff', borderRadius: 16, width: '48%',
-    overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.08,
+    shadowColor: '#000', shadowOpacity: 0.08,
     shadowRadius: 8, elevation: 3,
   },
-  imageContainer: { width: '100%', aspectRatio: 1, backgroundColor: '#f0f0f0', position: 'relative' },
+  imageContainer: { width: '100%', height: 160, backgroundColor: '#f0f0f0', position: 'relative', borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: 'hidden' },
   image: { width: '100%', height: '100%' },
   imagePlaceholder: { alignItems: 'center', justifyContent: 'center' },
   imagePlaceholderText: { fontSize: 40 },
