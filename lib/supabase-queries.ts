@@ -42,10 +42,12 @@ export interface MarketPrice {
 
 export interface ItemPhoto {
   id: string;
-  item_id: string;
-  photo_url: string;
+  catalog_item_id?: number;
+  user_collection_item_id?: number;
+  storage_path: string;
+  bucket_name: string;
   is_primary: boolean;
-  photo_type: 'catalog' | 'user';
+  photo_type: string;
 }
 
 export interface UserProfile {
@@ -147,7 +149,7 @@ export async function getCatalogItemById(id: string) {
     .select(`
       *,
       market_prices ( price_brl, price_usd, source, condition_grade, fetched_at ),
-      item_photos ( photo_url, is_primary, photo_type ),
+      item_photos ( storage_path, bucket_name, is_primary, photo_type ),
       item_variants ( id, name, description )
     `)
     .eq('id', id)
@@ -168,7 +170,7 @@ export async function getCollectionItems(userId: string): Promise<CollectionItem
         id, display_name, year, product_line_id, rarity_level, image_url,
         market_prices ( price_brl, source, fetched_at )
       ),
-      item_photos ( photo_url, is_primary, photo_type )
+      item_photos ( storage_path, bucket_name, is_primary, photo_type )
     `)
     .eq('user_id', userId)
     .is('deleted_at', null)
@@ -182,10 +184,13 @@ export async function getCollectionItems(userId: string): Promise<CollectionItem
       new Date(b.fetched_at).getTime() - new Date(a.fetched_at).getTime()
     )[0];
     const primaryPhoto = (row.item_photos ?? []).find((p: ItemPhoto) => p.is_primary);
+    const primaryPhotoUrl = primaryPhoto
+      ? getPublicPhotoUrl(primaryPhoto.storage_path, (primaryPhoto.bucket_name as 'item-photos' | 'catalog-photos') ?? 'item-photos')
+      : null;
     return {
       ...row,
       market_value: latest?.price_brl ?? 0,
-      primary_photo_url: primaryPhoto?.photo_url ?? row.catalog_item?.image_url ?? null,
+      primary_photo_url: primaryPhotoUrl ?? row.catalog_item?.image_url ?? null,
     };
   });
 }
@@ -282,10 +287,11 @@ export async function calcPatrimonioLive(userId: string) {
 // ─── Fotos ────────────────────────────────────────────────────────────────────
 
 export async function getItemPhotos(itemId: string, type: 'catalog' | 'user' = 'catalog') {
+  const col = type === 'catalog' ? 'catalog_item_id' : 'user_collection_item_id';
   const { data, error } = await supabase
     .from('item_photos')
     .select('*')
-    .eq('item_id', itemId)
+    .eq(col, itemId)
     .eq('photo_type', type)
     .order('is_primary', { ascending: false });
 
