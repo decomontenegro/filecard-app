@@ -162,19 +162,21 @@ export async function getCatalogItemById(id: string) {
 // ─── Coleção do usuário ───────────────────────────────────────────────────────
 
 export async function getCollectionItems(userId: string): Promise<CollectionItem[]> {
+  // user_collection_items does not have user_id directly — it links through user_collections
   const { data, error } = await supabase
     .from('user_collection_items')
     .select(`
-      id, user_id, catalog_item_id, condition_grade, price_paid, acquired_at, notes, version, deleted_at,
+      id, catalog_item_id, condition_grade, price_paid, acquisition_date, private_notes, photo_url, deleted_at,
+      user_collection:user_collections ( user_id ),
       catalog_item:catalog_items (
         id, display_name, year, product_line_id, rarity_level, image_url,
         market_prices ( price_brl, source, fetched_at )
       ),
       item_photos ( storage_path, bucket_name, is_primary, photo_type )
     `)
-    .eq('user_id', userId)
+    .eq('user_collection.user_id', userId)
     .is('deleted_at', null)
-    .order('acquired_at', { ascending: false });
+    .order('acquisition_date', { ascending: false });
 
   if (error) throw error;
 
@@ -183,16 +185,42 @@ export async function getCollectionItems(userId: string): Promise<CollectionItem
     const latest = prices.sort((a, b) =>
       new Date(b.fetched_at).getTime() - new Date(a.fetched_at).getTime()
     )[0];
+    // item_photos join — prefer that; fallback to inline photo_url or catalog image
     const primaryPhoto = (row.item_photos ?? []).find((p: ItemPhoto) => p.is_primary);
     const primaryPhotoUrl = primaryPhoto
       ? getPublicPhotoUrl(primaryPhoto.storage_path, (primaryPhoto.bucket_name as 'item-photos' | 'catalog-photos') ?? 'item-photos')
-      : null;
+      : (row.photo_url ?? null);
     return {
       ...row,
+      user_id: row.user_collection?.user_id ?? userId,
       market_value: latest?.price_brl ?? 0,
       primary_photo_url: primaryPhotoUrl ?? row.catalog_item?.image_url ?? null,
     };
   });
+}
+
+export async function getOrCreateUserCollection(userId: string): Promise<number> {
+  // Get or create the default user_collection for this user
+  let { data, error } = await supabase
+    .from('user_collections')
+    .select('id')
+    .eq('user_id', userId)
+    .order('created_at')
+    .limit(1)
+    .single();
+
+  if (error && error.code === 'PGRST116') {
+    // Not found — create default collection
+    const { data: created, error: createError } = await supabase
+      .from('user_collections')
+      .insert({ user_id: userId, name: 'Minha Coleção' })
+      .select('id')
+      .single();
+    if (createError) throw createError;
+    return created.id;
+  }
+  if (error) throw error;
+  return data!.id;
 }
 
 export async function addToCollection(
@@ -201,14 +229,15 @@ export async function addToCollection(
   condition: string = 'C8',
   pricePaid?: number
 ) {
+  const collectionId = await getOrCreateUserCollection(userId);
   const { data, error } = await supabase
     .from('user_collection_items')
     .insert({
-      user_id: userId,
+      user_collection_id: collectionId,
       catalog_item_id: catalogItemId,
       condition_grade: condition,
       price_paid: pricePaid ?? null,
-      acquired_at: new Date().toISOString(),
+      acquisition_date: new Date().toISOString().split('T')[0],
     })
     .select()
     .single();
@@ -221,9 +250,14 @@ export async function updateCollectionItem(
   id: string,
   updates: Partial<Pick<CollectionItem, 'condition_grade' | 'price_paid' | 'notes'>>
 ) {
+  // Map 'notes' to 'private_notes' (schema column name)
+  const { notes, ...rest } = updates as any;
+  const payload: any = { ...rest };
+  if (notes !== undefined) payload.private_notes = notes;
+
   const { data, error } = await supabase
     .from('user_collection_items')
-    .update({ ...updates, version: supabase.rpc('increment_version') })
+    .update(payload)
     .eq('id', id)
     .select()
     .single();
