@@ -36,7 +36,7 @@ export interface MarketPrice {
   price_brl: number;
   price_usd?: number;
   source: string;
-  condition?: string;
+  condition_grade?: string;
   fetched_at: string;
 }
 
@@ -109,7 +109,7 @@ export async function getCatalogItems(filters?: {
     .from('catalog_items')
     .select(`
       id, display_name, year, franchise_id, rarity_level, image_url, description,
-      market_prices ( price_brl, condition, source, fetched_at )
+      market_prices ( price_brl, condition_grade, source, fetched_at )
     `)
     .is('deleted_at', null)
     .range(from, to)
@@ -147,7 +147,7 @@ export async function getCatalogItemById(id: string) {
     .from('catalog_items')
     .select(`
       *,
-      market_prices ( price_brl, price_usd, source, condition, fetched_at ),
+      market_prices ( price_brl, price_usd, source, condition_grade, fetched_at ),
       item_photos ( photo_url, is_primary, photo_type ),
       item_variants ( id, name, description )
     `)
