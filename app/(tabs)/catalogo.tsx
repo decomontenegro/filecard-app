@@ -49,7 +49,7 @@ export default function CatalogoScreen() {
     <TouchableOpacity style={styles.card} activeOpacity={0.85}>
       <View style={styles.imageContainer}>
         {item.image_url ? (
-          <Image source={{ uri: item.image_url }} style={styles.image} resizeMode="cover" />
+          <Image source={{ uri: item.image_url }} style={styles.image} resizeMode="contain" />
         ) : (
           <View style={[styles.image, styles.imagePlaceholder]}>
             <Text style={styles.imagePlaceholderText}>🎖️</Text>
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOpacity: 0.08,
     shadowRadius: 8, elevation: 3,
   },
-  imageContainer: { width: '100%', height: 160, backgroundColor: '#f0f0f0', position: 'relative', borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: 'hidden' },
+  imageContainer: { width: '100%', height: 180, backgroundColor: '#f5f5f0', position: 'relative', borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: 'hidden' },
   image: { width: '100%', height: '100%' },
   imagePlaceholder: { alignItems: 'center', justifyContent: 'center' },
   imagePlaceholderText: { fontSize: 40 },
