@@ -2,8 +2,11 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // eBay Browse API — Buy/Browse v1
-// Docs: https://developer.ebay.com/api-docs/buy/browse/resources/item_summary/methods/search
-const EBAY_API_URL = 'https://api.ebay.com/buy/browse/v1/item_summary/search';
+// Docs: https://developer.ebay.com/api-docs/buy/browse/resources/item_summary/search
+// Sandbox: api.sandbox.ebay.com | Production: api.ebay.com
+const IS_SANDBOX = Deno.env.get('EBAY_SANDBOX') === 'true';
+const EBAY_BASE = IS_SANDBOX ? 'https://api.sandbox.ebay.com' : 'https://api.ebay.com';
+const EBAY_API_URL = `${EBAY_BASE}/buy/browse/v1/item_summary/search`;
 
 // Cache TTL: 24h (in seconds)
 const CACHE_TTL_HOURS = 24;
@@ -19,7 +22,8 @@ interface EbaySearchResult {
 
 async function getEbayToken(clientId: string, clientSecret: string): Promise<string> {
   const credentials = btoa(`${clientId}:${clientSecret}`);
-  const res = await fetch('https://api.ebay.com/identity/v1/oauth2/token', {
+  const tokenUrl = `${EBAY_BASE}/identity/v1/oauth2/token`;
+  const res = await fetch(tokenUrl, {
     method: 'POST',
     headers: {
       'Authorization': `Basic ${credentials}`,
