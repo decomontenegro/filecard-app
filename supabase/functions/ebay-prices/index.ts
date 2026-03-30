@@ -136,7 +136,7 @@ serve(async (req) => {
       const cutoff = new Date(Date.now() - CACHE_TTL_HOURS * 60 * 60 * 1000).toISOString();
       const { data: staleItems } = await supabase
         .from('catalog_items')
-        .select('id, name')
+        .select('id, display_name')
         .limit(50); // Process max 50 per invocation
 
       if (!staleItems || staleItems.length === 0) {
@@ -156,7 +156,7 @@ serve(async (req) => {
 
       for (const item of staleItems) {
         if (recentIds.has(item.id)) continue; // Still fresh
-        items.push({ catalog_item_id: item.id, condition_grade: 'C8', name: item.name });
+        items.push({ catalog_item_id: item.id, condition_grade: 'C8', name: item.display_name });
       }
     }
 
