@@ -194,7 +194,7 @@ export default function ScannerScreen() {
 
       {scanState === 'confirmed' && (
         <View style={styles.confirmedContainer}>
-          <Text style={styles.confirmedEmoji}>OK</Text>
+          <Text style={styles.confirmedEmoji}>✅</Text>
           <Text style={styles.confirmedTitle}>Adicionado!</Text>
           <Text style={styles.confirmedSubtitle}>
             {selectedCandidate?.display_name} foi adicionado à sua coleção

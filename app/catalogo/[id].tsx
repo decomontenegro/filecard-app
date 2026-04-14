@@ -14,6 +14,8 @@ import { getCatalogItemById, getPublicPhotoUrl } from '../../lib/supabase-querie
 import { supabase, SUPABASE_ANON_KEY, SUPABASE_URL } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useCollection } from '../../hooks/useCollection';
+import { useMarketPrices } from '../../hooks/useMarketPrices';
+import { MarketPriceCard } from '../../components/MarketPriceCard';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -443,6 +445,12 @@ export default function CatalogoItemScreen() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Live market prices via hook (uses cache + Edge Function fallback)
+  const { prices: livePrices, loading: pricesLoading, error: pricesError } = useMarketPrices(
+    item?.id ? String(item.id) : null,
+    item?.display_name ?? ''
+  );
+
   const fetchAccessoriesAndVariants = useCallback(async (catalogId: string) => {
     try {
       const [accRes, varRes] = await Promise.all([
@@ -502,8 +510,6 @@ export default function CatalogoItemScreen() {
     ? getPublicPhotoUrl(primaryPhoto.storage_path, primaryPhoto.bucket_name)
     : item.image_url;
 
-  const prices: any[] = item.market_prices ?? [];
-
   return (
     <SafeAreaView style={styles.safe}>
       {/* Header */}
@@ -545,25 +551,15 @@ export default function CatalogoItemScreen() {
           ) : null}
         </View>
 
-        {/* Market prices */}
-        {prices.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Preços de Mercado</Text>
-            <View style={styles.priceGrid}>
-              {prices.slice(0, 6).map((p: any) => (
-                <View key={p.condition_grade} style={styles.priceCard}>
-                  <Text style={styles.priceCondition}>{p.condition_grade}</Text>
-                  <Text style={styles.priceValue}>{formatBRL(p.price_brl ?? 0)}</Text>
-                </View>
-              ))}
-            </View>
-            {prices[0]?.fetched_at && (
-              <Text style={styles.priceSource}>
-                via eBay · {new Date(prices[0].fetched_at).toLocaleDateString('pt-BR')}
-              </Text>
-            )}
-          </View>
-        )}
+        {/* Market prices — via useMarketPrices hook (live cache + eBay Edge Function) */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Preços de Mercado</Text>
+          <MarketPriceCard
+            prices={livePrices}
+            loading={pricesLoading}
+            error={pricesError}
+          />
+        </View>
 
         {/* ── Versões (item_variants) ── */}
         {variants.length > 0 && (

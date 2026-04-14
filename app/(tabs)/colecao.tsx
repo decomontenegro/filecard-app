@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Image,
   StyleSheet, SafeAreaView, ActivityIndicator, Alert,
@@ -60,7 +60,7 @@ export default function ColecaoScreen() {
         </View>
       ) : items.length === 0 ? (
         <View style={styles.center}>
-          <Text style={styles.emptyEmoji}>—</Text>
+          <Text style={styles.emptyEmoji}>📦</Text>
           <Text style={styles.emptyTitle}>Coleção vazia</Text>
           <Text style={styles.emptySubtitle}>Adicione figuras pelo catálogo ou escaneie uma</Text>
           <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push('/(tabs)/catalogo')}>

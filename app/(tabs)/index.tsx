@@ -122,7 +122,7 @@ export default function HomeScreen() {
             {/* Empty state */}
             {itemCount === 0 && (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyEmoji}>*</Text>
+                <Text style={styles.emptyEmoji}>📦</Text>
                 <Text style={styles.emptyTitle}>Comece sua coleção</Text>
                 <Text style={styles.emptySubtitle}>Escaneie uma figura ou busque no catálogo</Text>
                 <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push('/(tabs)/catalogo')}>
