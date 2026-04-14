@@ -6,12 +6,12 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  ArrowLeft, Plus, Star, Package, Shield, Check,
-  ChevronDown, X, ShoppingBag, Sword, Backpack, CreditCard,
+  ArrowLeft, Plus, Star, Package, Check,
+  X, ShoppingBag, Sword, Backpack, CreditCard,
 } from 'lucide-react-native';
 import { theme } from '../../constants/theme';
-import { getCatalogItemById, getPublicPhotoUrl, getOrCreateUserCollection } from '../../lib/supabase-queries';
-import { supabase } from '../../lib/supabase';
+import { getCatalogItemById, getPublicPhotoUrl } from '../../lib/supabase-queries';
+import { supabase, SUPABASE_ANON_KEY, SUPABASE_URL } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useCollection } from '../../hooks/useCollection';
 
@@ -65,9 +65,6 @@ const UNDERWEAR_OPTIONS = [
   { value: 'torn',     label: 'Rasgada' },
   { value: 'missing',  label: 'Faltando' },
 ];
-
-const SUPABASE_URL = 'https://kqvbdkukykyoozseluza.supabase.co';
-const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxdmJka3VreWt5b296c2VsdXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDcwMzgsImV4cCI6MjA5MDI4MzAzOH0.DQwmnL2_cHKHlzm18cpn1y7WOn1OzK_kS140XsCZnJM';
 
 const formatBRL = (v: number) =>
   v > 0 ? `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}` : '—';
@@ -451,11 +448,11 @@ export default function CatalogoItemScreen() {
       const [accRes, varRes] = await Promise.all([
         fetch(
           `${SUPABASE_URL}/rest/v1/accessories?catalog_item_id=eq.${catalogId}&select=id,name,accessory_type,required_for_complete,display_order&order=display_order`,
-          { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
+          { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
         ),
         fetch(
           `${SUPABASE_URL}/rest/v1/item_variants?catalog_item_id=eq.${catalogId}&select=id,variant_name,variant_type,region`,
-          { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
+          { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
         ),
       ]);
       if (accRes.ok) setAccessories(await accRes.json());

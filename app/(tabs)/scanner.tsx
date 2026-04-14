@@ -102,8 +102,8 @@ export default function ScannerScreen() {
         <View style={styles.idleContainer}>
           <View style={styles.scanArea}>
             <Camera size={64} color={theme.colors.primary} strokeWidth={1.5} />
-            <Text style={styles.scanTitle}>Identifique sua figura</Text>
-            <Text style={styles.scanSubtitle}>Tire uma foto ou envie da galeria{'\n'}para identificar a figura automaticamente</Text>
+            <Text style={styles.scanTitle}>Busca assistida por foto</Text>
+            <Text style={styles.scanSubtitle}>Tire uma foto ou envie da galeria{'\n'}para comparar com candidatos do catálogo</Text>
           </View>
           <View style={styles.buttons}>
             <TouchableOpacity style={styles.btnPrimary} onPress={openCamera}>
@@ -115,7 +115,7 @@ export default function ScannerScreen() {
               <Text style={styles.btnSecondaryText}>Galeria</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.tipText}>Dica: foto com fundo neutro e boa iluminação dá resultados melhores</Text>
+          <Text style={styles.tipText}>Dica: isso ainda não identifica sozinho — ele sugere candidatos para você confirmar</Text>
         </View>
       )}
 
@@ -125,7 +125,7 @@ export default function ScannerScreen() {
             <Image source={{ uri: selectedImage }} style={styles.previewImage} resizeMode="cover" />
           )}
           <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 24 }} />
-          <Text style={styles.processingText}>Analisando figura...</Text>
+          <Text style={styles.processingText}>Buscando candidatos...</Text>
           <Text style={styles.processingSubtext}>Comparando com catálogo GI Joe ARAH</Text>
         </View>
       )}
@@ -135,7 +135,7 @@ export default function ScannerScreen() {
           {selectedImage && (
             <Image source={{ uri: selectedImage }} style={styles.previewImageSmall} resizeMode="cover" />
           )}
-          <Text style={styles.resultsTitle}>Candidatos encontrados</Text>
+          <Text style={styles.resultsTitle}>Candidatos para conferência manual</Text>
           {candidates.map((item, i) => (
             <TouchableOpacity
               key={item.id}
@@ -176,7 +176,7 @@ export default function ScannerScreen() {
                   <CheckCircle size={18} color="#fff" />
                 )}
                 <Text style={styles.btnPrimaryText}>
-                  {adding ? 'Adicionando...' : 'Adicionar à Coleção'}
+                  {adding ? 'Adicionando...' : 'Confirmar e adicionar'}
                 </Text>
               </TouchableOpacity>
             ) : (
