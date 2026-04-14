@@ -20,6 +20,54 @@ interface EbaySearchResult {
   total?: number;
 }
 
+/**
+ * Fetch current USD→BRL exchange rate.
+ * Primary: economia.awesomeapi.com.br (BR-hosted, reliable)
+ * Fallback: api.exchangerate-api.com
+ * Final fallback: 5.0 (hardcoded)
+ */
+async function getUSDtoBRL(): Promise<number> {
+  const FALLBACK_RATE = 5.0;
+  
+  // Option A: AwesomeAPI (BR)
+  try {
+    const res = await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL', {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const rate = parseFloat(data?.USDBRL?.bid ?? '0');
+      if (rate > 0) {
+        console.log(`Exchange rate USD→BRL: ${rate} (source: awesomeapi)`);
+        return rate;
+      }
+    }
+  } catch (e) {
+    console.warn('AwesomeAPI exchange rate failed:', e);
+  }
+
+  // Option B: ExchangeRate-API
+  try {
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD', {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const rate = data?.rates?.BRL ?? 0;
+      if (rate > 0) {
+        console.log(`Exchange rate USD→BRL: ${rate} (source: exchangerate-api)`);
+        return rate;
+      }
+    }
+  } catch (e) {
+    console.warn('ExchangeRate-API failed:', e);
+  }
+
+  // Fallback
+  console.warn(`Using fallback exchange rate: ${FALLBACK_RATE}`);
+  return FALLBACK_RATE;
+}
+
 async function getEbayToken(clientId: string, clientSecret: string): Promise<string> {
   const credentials = btoa(`${clientId}:${clientSecret}`);
   const tokenUrl = `${EBAY_BASE}/identity/v1/oauth2/token`;
@@ -93,9 +141,8 @@ async function searchEbaySoldPrices(
     ? prices[mid]
     : (prices[mid - 1] + prices[mid]) / 2;
 
-  // Convert USD → BRL (approximate — update rate periodically)
-  // TODO: integrate an exchange rate API for accurate conversion
-  const USD_TO_BRL = 5.0;
+  // Convert USD → BRL using dynamic exchange rate
+  const USD_TO_BRL = await getUSDtoBRL();
   return Math.round(medianUSD * USD_TO_BRL);
 }
 
