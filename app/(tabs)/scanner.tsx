@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Image,
-  ActivityIndicator, ScrollView,
+  ActivityIndicator, ScrollView, TextInput,
 } from 'react-native';
-import { Camera, Upload, CheckCircle, XCircle } from 'lucide-react-native';
+import { Camera, Upload, CheckCircle, XCircle, Search } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
@@ -21,6 +21,8 @@ export default function ScannerScreen() {
   const [candidates, setCandidates] = useState<any[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<any | null>(null);
   const [adding, setAdding] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searching, setSearching] = useState(false);
 
   async function pickImage() {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -69,6 +71,31 @@ export default function ScannerScreen() {
     }
   }
 
+  async function searchByName() {
+    if (!searchQuery.trim()) return;
+    setSearching(true);
+    setScanState('processing');
+    try {
+      const results = await getCatalogItems({ search: searchQuery.trim(), pageSize: 10 });
+      if (results.length === 0) {
+        setScanState('idle');
+        setSearching(false);
+        return;
+      }
+      const top3 = results.slice(0, 3).map((item, i) => ({
+        ...item,
+        confidence: i === 0 ? 95 : i === 1 ? 75 : 55,
+      }));
+      setCandidates(top3);
+      setSelectedCandidate(top3[0]);
+      setScanState('results');
+    } catch (e) {
+      setScanState('idle');
+    } finally {
+      setSearching(false);
+    }
+  }
+
   async function confirmAdd() {
     if (!user || !selectedCandidate) return;
     setAdding(true);
@@ -87,6 +114,7 @@ export default function ScannerScreen() {
     setSelectedImage(null);
     setCandidates([]);
     setSelectedCandidate(null);
+    setSearchQuery('');
   }
 
   const formatBRL = (v: number) => v > 0 ? `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}` : '—';
@@ -99,11 +127,42 @@ export default function ScannerScreen() {
       </View>
 
       {scanState === 'idle' && (
-        <View style={styles.idleContainer}>
+        <ScrollView contentContainerStyle={styles.idleContainer} keyboardShouldPersistTaps="handled">
+          {/* Busca por nome */}
+          <Text style={styles.sectionLabel}>BUSCAR POR NOME</Text>
+          <View style={styles.searchRow}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Ex: Snake Eyes, Cobra Commander..."
+              placeholderTextColor="#999"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onSubmitEditing={searchByName}
+              returnKeyType="search"
+            />
+            <TouchableOpacity
+              style={[styles.searchBtn, (!searchQuery.trim() || searching) && styles.btnDisabled]}
+              onPress={searchByName}
+              disabled={!searchQuery.trim() || searching}
+            >
+              {searching
+                ? <ActivityIndicator size="small" color="#fff" />
+                : <Search size={20} color="#fff" />}
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>ou identifique por foto</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
           <View style={styles.scanArea}>
-            <Camera size={64} color={theme.colors.primary} strokeWidth={1.5} />
-            <Text style={styles.scanTitle}>Busca assistida por foto</Text>
-            <Text style={styles.scanSubtitle}>Tire uma foto ou envie da galeria{'\n'}para comparar com candidatos do catálogo</Text>
+            <Camera size={48} color={theme.colors.primary} strokeWidth={1.5} />
+            <Text style={styles.scanTitle}>Busca por foto</Text>
+            <Text style={styles.scanSubtitle}>
+              {'Tire uma foto ou envie da galeria\npara comparar com candidatos do catálogo'}
+            </Text>
           </View>
           <View style={styles.buttons}>
             <TouchableOpacity style={styles.btnPrimary} onPress={openCamera}>
@@ -115,8 +174,8 @@ export default function ScannerScreen() {
               <Text style={styles.btnSecondaryText}>Galeria</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.tipText}>Dica: isso ainda não identifica sozinho — ele sugere candidatos para você confirmar</Text>
-        </View>
+          <Text style={styles.tipText}>A foto sugere candidatos para você confirmar — não identifica sozinho</Text>
+        </ScrollView>
       )}
 
       {scanState === 'processing' && (
@@ -148,6 +207,9 @@ export default function ScannerScreen() {
               <View style={styles.candidateRank}>
                 <Text style={styles.candidateRankText}>{['1','2','3'][i]}</Text>
               </View>
+              {item.image_url ? (
+                <Image source={{ uri: item.image_url }} style={styles.candidateThumb} resizeMode="contain" />
+              ) : null}
               <View style={styles.candidateInfo}>
                 <Text style={styles.candidateName}>{item.display_name}</Text>
                 <Text style={styles.candidateYear}>{item.year}</Text>
@@ -186,7 +248,7 @@ export default function ScannerScreen() {
             )}
             <TouchableOpacity style={styles.btnSecondary} onPress={reset}>
               <XCircle size={18} color={theme.colors.primary} />
-              <Text style={styles.btnSecondaryText}>Nova Foto</Text>
+              <Text style={styles.btnSecondaryText}>Nova Busca</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -194,7 +256,7 @@ export default function ScannerScreen() {
 
       {scanState === 'confirmed' && (
         <View style={styles.confirmedContainer}>
-          <Text style={styles.confirmedEmoji}>✅</Text>
+          <CheckCircle size={64} color={theme.colors.primary} />
           <Text style={styles.confirmedTitle}>Adicionado!</Text>
           <Text style={styles.confirmedSubtitle}>
             {selectedCandidate?.display_name} foi adicionado à sua coleção
@@ -203,7 +265,7 @@ export default function ScannerScreen() {
             <Text style={styles.btnPrimaryText}>Ver Coleção</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.btnSecondary, { marginTop: 12 }]} onPress={reset}>
-            <Text style={styles.btnSecondaryText}>Escanear outra figura</Text>
+            <Text style={styles.btnSecondaryText}>Buscar outra figura</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -216,22 +278,35 @@ const styles = StyleSheet.create({
   header: { backgroundColor: theme.colors.primary, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 },
   logo: { color: '#fff', fontSize: 16, fontWeight: '800', marginBottom: 4 },
   title: { color: '#fff', fontSize: 22, fontWeight: '700' },
-  idleContainer: { flex: 1, padding: 24 },
-  scanArea: {
-    flex: 1, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#fff', borderRadius: 24, marginBottom: 24,
-    borderWidth: 2, borderStyle: 'dashed', borderColor: theme.colors.primary + '40',
-    padding: 40,
+  idleContainer: { padding: 24, gap: 0 },
+  sectionLabel: { color: '#666', fontSize: 11, letterSpacing: 2, fontWeight: '700', marginBottom: 10 },
+  searchRow: { flexDirection: 'row', gap: 10, marginBottom: 24 },
+  searchInput: {
+    flex: 1, backgroundColor: '#fff', borderRadius: 14, paddingHorizontal: 14,
+    paddingVertical: 12, fontSize: 15, borderWidth: 1.5, borderColor: '#e0e0e0', color: '#000',
   },
-  scanTitle: { fontSize: 20, fontWeight: '700', color: '#000', marginTop: 16, marginBottom: 8 },
-  scanSubtitle: { fontSize: 14, color: '#666', textAlign: 'center', lineHeight: 20 },
-  buttons: { flexDirection: 'row', gap: 12, marginBottom: 16 },
+  searchBtn: {
+    backgroundColor: theme.colors.primary, borderRadius: 14, width: 52,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  divider: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#e0e0e0' },
+  dividerText: { color: '#999', fontSize: 12, fontWeight: '500' },
+  scanArea: {
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#fff', borderRadius: 24, marginBottom: 16,
+    borderWidth: 2, borderStyle: 'dashed', borderColor: theme.colors.primary + '40',
+    padding: 32,
+  },
+  scanTitle: { fontSize: 18, fontWeight: '700', color: '#000', marginTop: 12, marginBottom: 6 },
+  scanSubtitle: { fontSize: 13, color: '#666', textAlign: 'center', lineHeight: 20 },
+  buttons: { flexDirection: 'row', gap: 12, marginBottom: 12 },
   btnPrimary: {
     flex: 1, backgroundColor: theme.colors.primary, borderRadius: 14,
     paddingVertical: 14, flexDirection: 'row', alignItems: 'center',
     justifyContent: 'center', gap: 8,
   },
-  btnDisabled: { opacity: 0.6 },
+  btnDisabled: { opacity: 0.5 },
   btnPrimaryText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   btnSecondary: {
     flex: 1, backgroundColor: '#fff', borderRadius: 14,
@@ -239,7 +314,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', gap: 8, borderWidth: 2, borderColor: theme.colors.primary,
   },
   btnSecondaryText: { color: theme.colors.primary, fontSize: 15, fontWeight: '700' },
-  tipText: { color: '#888', fontSize: 13, textAlign: 'center', lineHeight: 18 },
+  tipText: { color: '#888', fontSize: 12, textAlign: 'center', lineHeight: 18, marginTop: 4 },
   processingContainer: { flex: 1, alignItems: 'center', padding: 24 },
   previewImage: { width: '100%', height: 280, borderRadius: 20 },
   processingText: { fontSize: 18, fontWeight: '700', color: '#000', marginTop: 16 },
@@ -253,8 +328,9 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: 'transparent',
   },
   candidateCardSelected: { borderColor: theme.colors.primary },
-  candidateRank: { width: 32, alignItems: 'center' },
-  candidateRankText: { fontSize: 22 },
+  candidateRank: { width: 28, alignItems: 'center' },
+  candidateRankText: { fontSize: 18, fontWeight: '800', color: '#333' },
+  candidateThumb: { width: 48, height: 48, borderRadius: 8, backgroundColor: '#f5f5f5' },
   candidateInfo: { flex: 1 },
   candidateName: { fontSize: 15, fontWeight: '700', color: '#000' },
   candidateYear: { color: '#666', fontSize: 12, marginTop: 2 },
@@ -267,7 +343,6 @@ const styles = StyleSheet.create({
   },
   loginHintText: { color: '#666', fontSize: 14 },
   confirmedContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  confirmedEmoji: { fontSize: 64, marginBottom: 16 },
-  confirmedTitle: { fontSize: 28, fontWeight: '800', color: '#000', marginBottom: 8 },
+  confirmedTitle: { fontSize: 28, fontWeight: '800', color: '#000', marginTop: 16, marginBottom: 8 },
   confirmedSubtitle: { fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 32, lineHeight: 22 },
 });

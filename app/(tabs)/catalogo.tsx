@@ -13,7 +13,7 @@ import { useCollection } from '../../hooks/useCollection';
 
 import { CatalogItem } from '../../lib/supabase-queries';
 
-const YEAR_FILTERS = ['Todos', '1982', '1983', '1984', '1985', '1986', '1987', '1988'];
+const YEAR_FILTERS = ['Todos', '1982', '1983', '1984', '1985', '1986', '1987', '1988', '1989', '1990', '1991', '1992', '1993', '1995'];
 const RARITY_COLORS = ['', '#999', '#4CAF50', '#2196F3', '#FF9800', '#F44336'];
 
 const formatBRL = (v: number) =>
