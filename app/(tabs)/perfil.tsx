@@ -1,4 +1,5 @@
 import React from 'react';
+import { Share } from 'react-native';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, ActivityIndicator,
@@ -42,12 +43,21 @@ export default function PerfilScreen() {
     { label: 'Retorno', value: stats.appreciation !== 0 ? `${stats.appreciation >= 0 ? '+' : ''}${stats.appreciation}%` : '—' },
   ];
 
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Confira minha coleção GI Joe no filecard! 🦖 ${stats.totalItems} figuras valendo ${formatBRL(stats.totalMarket)}\nhttps://filecard-app.vercel.app`,
+        title: 'Minha Coleção GI Joe',
+      });
+    } catch (_) {}
+  };
+
   const MENU_ITEMS = [
-    { icon: <Star size={20} color={theme.colors.primary} />, label: 'Favoritos', count: '' },
-    { icon: <Heart size={20} color={theme.colors.primary} />, label: 'Wishlist', count: '' },
-    { icon: <Trophy size={20} color={theme.colors.primary} />, label: 'Conquistas', count: '' },
-    { icon: <Share2 size={20} color={theme.colors.primary} />, label: 'Compartilhar Coleção' },
-    { icon: <Settings size={20} color={theme.colors.primary} />, label: 'Configurações' },
+    { icon: <Star size={20} color={theme.colors.primary} />, label: 'Favoritos', comingSoon: true },
+    { icon: <Heart size={20} color={theme.colors.primary} />, label: 'Wishlist', comingSoon: true },
+    { icon: <Trophy size={20} color={theme.colors.primary} />, label: 'Conquistas', comingSoon: true },
+    { icon: <Share2 size={20} color={theme.colors.primary} />, label: 'Compartilhar Coleção', onPress: handleShare },
+    { icon: <Settings size={20} color={theme.colors.primary} />, label: 'Configurações', comingSoon: true },
   ];
 
   return (
@@ -69,7 +79,7 @@ export default function PerfilScreen() {
             {/* Avatar e nome */}
             <View style={styles.profileSection}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>FC</Text>
+                <Text style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</Text>
               </View>
               <Text style={styles.name}>{displayName}</Text>
               <Text style={styles.handle}>{handle}</Text>
@@ -131,16 +141,20 @@ export default function PerfilScreen() {
               <Text style={styles.sectionTitle}>MINHA CONTA</Text>
               <View style={styles.menuCard}>
                 {MENU_ITEMS.map((item, i) => (
-                  <TouchableOpacity key={i} style={[styles.menuItem, i < MENU_ITEMS.length - 1 && styles.menuItemBorder]}>
+                  <TouchableOpacity
+                    key={i}
+                    style={[styles.menuItem, i < MENU_ITEMS.length - 1 && styles.menuItemBorder, item.comingSoon && styles.menuItemDisabled]}
+                    onPress={item.onPress}
+                    disabled={item.comingSoon}
+                  >
                     <View style={styles.menuIcon}>{item.icon}</View>
-                    <Text style={styles.menuLabel}>{item.label}</Text>
+                    <Text style={[styles.menuLabel, item.comingSoon && styles.menuLabelMuted]}>{item.label}</Text>
                     <View style={styles.menuRight}>
-                      {item.count ? (
-                        <View style={styles.menuBadge}>
-                          <Text style={styles.menuBadgeText}>{item.count}</Text>
-                        </View>
-                      ) : null}
-                      <ChevronRight size={16} color="#ccc" />
+                      {item.comingSoon ? (
+                        <Text style={styles.comingSoonText}>em breve</Text>
+                      ) : (
+                        <ChevronRight size={16} color="#ccc" />
+                      )}
                     </View>
                   </TouchableOpacity>
                 ))}
@@ -222,6 +236,9 @@ const styles = StyleSheet.create({
   menuRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   menuBadge: { backgroundColor: theme.colors.primary + '20', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
   menuBadgeText: { color: theme.colors.primary, fontSize: 12, fontWeight: '700' },
+  menuItemDisabled: { opacity: 0.5 },
+  menuLabelMuted: { color: '#888' },
+  comingSoonText: { color: '#bbb', fontSize: 11, fontWeight: '600', fontStyle: 'italic' },
   logoutBtn: {
     backgroundColor: '#fff', borderRadius: 16, padding: 16,
     flexDirection: 'row', alignItems: 'center', gap: 12,

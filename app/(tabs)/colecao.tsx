@@ -103,7 +103,7 @@ export default function ColecaoScreen() {
               );
             };
             return (
-              <TouchableOpacity key={item.id} style={styles.itemCard} activeOpacity={0.85}>
+              <TouchableOpacity key={item.id} style={styles.itemCard} activeOpacity={0.85} onPress={() => router.push(`/catalogo/${item.catalog_item_id ?? item.catalog_item?.id}`)}>
                 <View style={styles.thumbContainer}>
                   {item.primary_photo_url ? (
                     <Image source={{ uri: item.primary_photo_url }} style={styles.thumb} resizeMode="cover" />

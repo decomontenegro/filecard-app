@@ -12,6 +12,7 @@ import { useAuth } from '../../context/AuthContext';
 
 
 type ScanState = 'idle' | 'processing' | 'results' | 'confirmed';
+type SearchMode = 'text' | 'photo';
 
 export default function ScannerScreen() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function ScannerScreen() {
   const [adding, setAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
+  const [searchMode, setSearchMode] = useState<SearchMode>('text');
 
   async function pickImage() {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -53,18 +55,14 @@ export default function ScannerScreen() {
 
   async function analyzeImage() {
     setScanState('processing');
+    setSearchMode('photo');
     try {
-      // Fase 1: busca simples no catálogo (sem embeddings ainda)
-      // Pega os primeiros itens do catálogo como candidatos
-      const allItems = await getCatalogItems({ pageSize: 50 });
-      // Simula ranking por relevância (Fase 2 vai usar embeddings pgvector)
-      const shuffled = [...allItems].sort(() => Math.random() - 0.5);
-      const top3 = shuffled.slice(0, 3).map((item, i) => ({
-        ...item,
-        confidence: Math.round(90 - i * 18),
-      }));
-      setCandidates(top3);
-      setSelectedCandidate(top3[0]);
+      // Fase 1: sem embeddings — lista candidatos recentes para seleção manual
+      const items = await getCatalogItems({ pageSize: 10 });
+      // Sem confidence fake — usuário seleciona manualmente
+      const candidates = items.map((item) => ({ ...item, confidence: null }));
+      setCandidates(candidates);
+      setSelectedCandidate(candidates[0] ?? null);
       setScanState('results');
     } catch (e) {
       setScanState('idle');
@@ -75,6 +73,7 @@ export default function ScannerScreen() {
     if (!searchQuery.trim()) return;
     setSearching(true);
     setScanState('processing');
+    setSearchMode('text');
     try {
       const results = await getCatalogItems({ search: searchQuery.trim(), pageSize: 10 });
       if (results.length === 0) {
@@ -195,6 +194,9 @@ export default function ScannerScreen() {
             <Image source={{ uri: selectedImage }} style={styles.previewImageSmall} resizeMode="cover" />
           )}
           <Text style={styles.resultsTitle}>Candidatos para conferência manual</Text>
+          {searchMode === 'photo' && (
+            <Text style={styles.photoHint}>📸 Selecione a figura correspondente à foto:</Text>
+          )}
           {candidates.map((item, i) => (
             <TouchableOpacity
               key={item.id}
@@ -205,7 +207,7 @@ export default function ScannerScreen() {
               onPress={() => setSelectedCandidate(item)}
             >
               <View style={styles.candidateRank}>
-                <Text style={styles.candidateRankText}>{['1','2','3'][i]}</Text>
+                <Text style={styles.candidateRankText}>{i + 1}</Text>
               </View>
               {item.image_url ? (
                 <Image source={{ uri: item.image_url }} style={styles.candidateThumb} resizeMode="contain" />
@@ -215,14 +217,16 @@ export default function ScannerScreen() {
                 <Text style={styles.candidateYear}>{item.year}</Text>
                 <Text style={styles.candidateValue}>{formatBRL(item.market_value_brl ?? 0)}</Text>
               </View>
-              <View style={[
-                styles.confidenceBadge,
-                { backgroundColor: i === 0 ? theme.colors.primary : '#e0e0e0' },
-              ]}>
-                <Text style={[styles.confidenceText, { color: i === 0 ? '#fff' : '#666' }]}>
-                  {item.confidence}%
-                </Text>
-              </View>
+              {searchMode === 'text' && item.confidence != null && (
+                <View style={[
+                  styles.confidenceBadge,
+                  { backgroundColor: i === 0 ? theme.colors.primary : '#e0e0e0' },
+                ]}>
+                  <Text style={[styles.confidenceText, { color: i === 0 ? '#fff' : '#666' }]}>
+                    {item.confidence}%
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
           ))}
           <View style={styles.resultsActions}>
@@ -242,9 +246,12 @@ export default function ScannerScreen() {
                 </Text>
               </TouchableOpacity>
             ) : (
-              <View style={styles.loginHint}>
-                <Text style={styles.loginHintText}>Faça login para adicionar à coleção</Text>
-              </View>
+              <TouchableOpacity
+                style={styles.btnPrimary}
+                onPress={() => router.push('/(auth)/login')}
+              >
+                <Text style={styles.btnPrimaryText}>Fazer login para adicionar</Text>
+              </TouchableOpacity>
             )}
             <TouchableOpacity style={styles.btnSecondary} onPress={reset}>
               <XCircle size={18} color={theme.colors.primary} />
@@ -314,7 +321,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center', gap: 8, borderWidth: 2, borderColor: theme.colors.primary,
   },
   btnSecondaryText: { color: theme.colors.primary, fontSize: 15, fontWeight: '700' },
-  tipText: { color: '#888', fontSize: 12, textAlign: 'center', lineHeight: 18, marginTop: 4 },
+  tipText: { color: '#555', fontSize: 13, textAlign: 'center', lineHeight: 18, marginTop: 4 },
+  photoHint: { color: '#555', fontSize: 13, fontWeight: '600', marginBottom: 4 },
   processingContainer: { flex: 1, alignItems: 'center', padding: 24 },
   previewImage: { width: '100%', height: 280, borderRadius: 20 },
   processingText: { fontSize: 18, fontWeight: '700', color: '#000', marginTop: 16 },

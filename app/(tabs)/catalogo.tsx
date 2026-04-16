@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
   FlatList, Image, StyleSheet, SafeAreaView, ActivityIndicator,
-  ScrollView,
+  ScrollView, Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Search, Plus } from 'lucide-react-native';
@@ -25,6 +25,12 @@ export default function CatalogoScreen() {
   const [query, setQuery] = useState('');
   const [activeYear, setActiveYear] = useState('Todos');
   const [addingId, setAddingId] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [pendingItem, setPendingItem] = useState<CatalogItem | null>(null);
+  const [selectedCondition, setSelectedCondition] = useState('C8');
+  const [pricePaid, setPricePaid] = useState('');
+
+  const CONDITIONS = ['C5', 'C6', 'C7', 'C8', 'C9', 'C10'];
 
   const yearFilter = activeYear === 'Todos' ? undefined : parseInt(activeYear, 10);
 
@@ -35,17 +41,28 @@ export default function CatalogoScreen() {
 
   const { add: addToCollection } = useCollection(user?.id ?? null);
 
-  const handleAdd = useCallback(async (item: CatalogItem) => {
+  const openAddModal = useCallback((item: CatalogItem) => {
     if (!user) return;
-    setAddingId(item.id);
+    setPendingItem(item);
+    setSelectedCondition('C8');
+    setPricePaid('');
+    setModalVisible(true);
+  }, [user]);
+
+  const handleConfirmAdd = useCallback(async () => {
+    if (!user || !pendingItem) return;
+    setModalVisible(false);
+    setAddingId(pendingItem.id);
     try {
-      await addToCollection(item.id, 'C8');
+      const price = pricePaid ? parseFloat(pricePaid.replace(',', '.')) : undefined;
+      await addToCollection(pendingItem.id, selectedCondition, price);
     } catch (e) {
       // silencioso na UI
     } finally {
       setAddingId(null);
+      setPendingItem(null);
     }
-  }, [user, addToCollection]);
+  }, [user, pendingItem, selectedCondition, pricePaid, addToCollection]);
 
   const renderItem = ({ item }: { item: CatalogItem & { market_value_brl?: number } }) => (
     <TouchableOpacity
@@ -76,7 +93,7 @@ export default function CatalogoScreen() {
         {user && (
           <TouchableOpacity
             style={styles.addBtn}
-            onPress={() => handleAdd(item)}
+            onPress={() => openAddModal(item)}
             disabled={addingId === item.id}
           >
             {addingId === item.id ? (
@@ -95,6 +112,55 @@ export default function CatalogoScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      {/* Modal de adição à coleção */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <Text style={styles.modalTitle}>Adicionar à Coleção</Text>
+            {pendingItem && (
+              <Text style={styles.modalItemName} numberOfLines={2}>{pendingItem.display_name}</Text>
+            )}
+
+            <Text style={styles.modalLabel}>Condição</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.conditionRow}>
+              {CONDITIONS.map(c => (
+                <TouchableOpacity
+                  key={c}
+                  style={[styles.conditionChip, selectedCondition === c && styles.conditionChipActive]}
+                  onPress={() => setSelectedCondition(c)}
+                >
+                  <Text style={[styles.conditionChipText, selectedCondition === c && styles.conditionChipTextActive]}>{c}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <Text style={styles.modalLabel}>Preço pago (opcional)</Text>
+            <View style={styles.priceInputRow}>
+              <Text style={styles.pricePrefix}>R$</Text>
+              <TextInput
+                style={styles.priceInput}
+                placeholder="0,00"
+                placeholderTextColor="#aaa"
+                keyboardType="numeric"
+                value={pricePaid}
+                onChangeText={setPricePaid}
+              />
+            </View>
+
+            <TouchableOpacity style={styles.modalConfirmBtn} onPress={handleConfirmAdd}>
+              <Text style={styles.modalConfirmText}>Adicionar à Coleção</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setModalVisible(false)}>
+              <Text style={styles.modalCancelText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <View style={styles.header}>
         <Text style={styles.logo}>filecard</Text>
         <View style={styles.searchBar}>
@@ -211,4 +277,39 @@ const styles = StyleSheet.create({
   retryBtn: { backgroundColor: theme.colors.primary, borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 },
   retryText: { color: '#fff', fontWeight: '700' },
   footerLoader: { padding: 20, alignItems: 'center' },
+  modalOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    padding: 24, paddingBottom: 36,
+  },
+  modalTitle: { fontSize: 18, fontWeight: '800', color: '#000', marginBottom: 4 },
+  modalItemName: { fontSize: 14, color: '#555', marginBottom: 20 },
+  modalLabel: { fontSize: 12, fontWeight: '700', color: '#666', letterSpacing: 1, marginBottom: 10 },
+  conditionRow: { flexDirection: 'row', marginBottom: 20 },
+  conditionChip: {
+    borderRadius: 20, paddingHorizontal: 18, paddingVertical: 8, marginRight: 8,
+    backgroundColor: '#f0f0f0', borderWidth: 2, borderColor: 'transparent',
+  },
+  conditionChipActive: { backgroundColor: theme.colors.primary + '20', borderColor: theme.colors.primary },
+  conditionChipText: { fontSize: 14, fontWeight: '700', color: '#666' },
+  conditionChipTextActive: { color: theme.colors.primary },
+  priceInputRow: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#f7f7f7',
+    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 24,
+    borderWidth: 1.5, borderColor: '#e0e0e0',
+  },
+  pricePrefix: { fontSize: 16, fontWeight: '700', color: '#555', marginRight: 6 },
+  priceInput: { flex: 1, fontSize: 16, color: '#000' },
+  modalConfirmBtn: {
+    backgroundColor: theme.colors.primary, borderRadius: 14,
+    paddingVertical: 14, alignItems: 'center', marginBottom: 10,
+  },
+  modalConfirmText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  modalCancelBtn: {
+    backgroundColor: '#f0f0f0', borderRadius: 14,
+    paddingVertical: 14, alignItems: 'center',
+  },
+  modalCancelText: { color: '#555', fontSize: 16, fontWeight: '600' },
 });
